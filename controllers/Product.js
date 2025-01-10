@@ -1,5 +1,6 @@
 const { Schema, default: mongoose } = require("mongoose");
 const Product = require("../models/Product");
+const Category = require("../models/Category");
 
 exports.create = async (req, res) => {
   try {
@@ -81,11 +82,9 @@ exports.getById = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        message: "Error getting product details, please try again later",
-      });
+    res.status(500).json({
+      message: "Error getting product details, please try again later",
+    });
   }
 };
 
@@ -146,10 +145,32 @@ exports.getFeaturedProducts = async (req, res) => {
     res.status(200).json(featuredProducts);
   } catch (error) {
     console.log(error);
+    res.status(500).json({
+      message: "Error fetching featured products, please try again later",
+    });
+  }
+};
+
+exports.getLatestProducts = async (req, res) => {
+  const categoryName = req.params.category;
+
+  try {
+    const category = await Category.findOne({ name: categoryName });
+
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const categoryId = category._id;
+
+    const products = await Product.find({ category: categoryId })
+      .sort({ createdAt: -1 })
+      .limit(10);
+    res.json(products);
+  } catch (err) {
+    console.log(err);
     res
       .status(500)
-      .json({
-        message: "Error fetching featured products, please try again later",
-      });
+      .json({ message: "Error Fetching Products, Please try again later" });
   }
 };

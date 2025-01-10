@@ -1,9 +1,10 @@
 const express=require("express")
 const categoryController=require("../controllers/Category")
-const router=express.Router()
+const   router=express.Router()
 
 router
     .get("/",categoryController.getAll)
+    .post("/create",categoryController.createCategory)
 
     
 module.exports=router

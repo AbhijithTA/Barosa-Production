@@ -153,6 +153,7 @@ exports.getFeaturedProducts = async (req, res) => {
 
 exports.getLatestProducts = async (req, res) => {
   const categoryName = req.params.category;
+  console.log(categoryName);
 
   try {
     const category = await Category.findOne({ name: categoryName });
@@ -162,6 +163,7 @@ exports.getLatestProducts = async (req, res) => {
     }
 
     const categoryId = category._id;
+    console.log(categoryId,"categoryId");
 
     const products = await Product.find({ category: categoryId })
       .sort({ createdAt: -1 })

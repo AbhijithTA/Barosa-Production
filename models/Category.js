@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const SubCategory = require("./SubCategory");
 const { Schema } = mongoose;
 
 const categorySchema = new Schema({
@@ -10,6 +11,13 @@ const categorySchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  subCategory: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "subcategory",
+    },
+  ],
 });
+
 
 module.exports = mongoose.model("Category", categorySchema);

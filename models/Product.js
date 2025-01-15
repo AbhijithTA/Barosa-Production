@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const SubCategory = require("./SubCategory");
 const { Schema } = mongoose;
 
 const productSchema = new Schema(
@@ -24,9 +25,9 @@ const productSchema = new Schema(
       ref: "Category",
       required: true,
     },
-    brand: {
+    SubCategory: {
       type: Schema.Types.ObjectId,
-      ref: "Brand",
+      ref: "SubCategory",
       required: true,
     },
     stockQuantity: {

@@ -6,6 +6,7 @@ router
   .post("/", productController.create)
   .get("/", productController.getAll)
   .get("/featured", productController.getFeaturedProducts)
+  .patch("/featured/:id", productController.featuredProduct)
   .get("/:id", productController.getById)
   .get("/latest-products/:category", productController.getLatestProducts)
   .patch("/:id", productController.updateById)

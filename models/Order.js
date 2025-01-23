@@ -33,6 +33,11 @@ const orderSchema=new Schema({
         type:Date,
         default:Date.now
     },
+    orderNo:{
+        type: Number,
+        required: true,
+        unique: true
+    }
 },{versionKey:false})
 
 module.exports=mongoose.model("Order",orderSchema)

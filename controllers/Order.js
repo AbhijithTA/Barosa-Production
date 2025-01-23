@@ -1,9 +1,24 @@
+const Counter = require("../models/Counter");
 const Order = require("../models/Order");
 
 exports.create=async(req,res)=>{
     try {
-        const created=new Order(req.body)
-        await created.save()
+
+        //find and increment the counter in one atomic operation
+        const counter = await Counter.findOneAndUpdate(
+            { name: "order" },
+            { $inc: { value:1 } },
+            { new: true, upsert: true }
+        );
+
+        // get the new order number
+        const orderNo = counter.value;
+        console.log(orderNo);
+
+
+        const created=new Order({...req.body,orderNo})
+        await created.save();
+
         res.status(201).json(created)
     } catch (error) {
         console.log(error);

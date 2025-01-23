@@ -2,7 +2,7 @@ const Cart=require('../models/Cart')
 
 exports.create=async(req,res)=>{
     try {
-        const created=await new Cart(req.body).populate({path:"product",populate:{path:"brand"}});
+        const created=await new Cart(req.body).populate({path:"product"});
         await created.save()
         res.status(201).json(created)
     } catch (error) {

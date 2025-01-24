@@ -156,7 +156,7 @@ exports.getAll = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Product.findById(id).populate("category");
+    const result = await Product.findById(id).populate("category").populate("subcategory");
     res.status(200).json(result);
   } catch (error) {
     console.log(error);

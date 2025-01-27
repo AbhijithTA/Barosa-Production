@@ -91,25 +91,19 @@ exports.getAll = async (req, res) => {
     let limit = 0;
 
     // filter by category or subCategory
-
     if (req.query.category) {
-      filter.category = { $in: req.query.category };
+      filter.category = req.query.category;
 
-      //if subCatgory is provided , then
       if (req.query.subCategory) {
-        const subCategoryExists = await SubCategory.findOne({
-          _id: req.query.subCategory,
-          category: req.query.category,
-        });
-
-        if (!subCategoryExists) {
-          return res.status(400).json({
-            message: "SubCategory does not belong to the given category",
-          });
-        }
-
-        filter.SubCategory = req.query.SubCategory;
+        filter.subCategory = req.query.subCategory;
       }
+    }
+
+    //if a subCategory is provied without a matching category
+    if (!req.query.category && req.query.subCategory) {
+      return res
+        .status(400)
+        .json({ message: "Please provide a category with the subCategory" });
     }
 
     if (req.query.user) {
@@ -156,7 +150,9 @@ exports.getAll = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Product.findById(id).populate("category").populate("subcategory");
+    const result = await Product.findById(id)
+      .populate("category")
+      .populate("subcategory");
     res.status(200).json(result);
   } catch (error) {
     console.log(error);

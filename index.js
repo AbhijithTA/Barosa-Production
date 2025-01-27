@@ -40,6 +40,7 @@ server.use("/categories",categoryRoutes)
 server.use("/address",addressRoutes)
 server.use("/reviews",reviewRoutes)
 server.use("/wishlist",wishlistRoutes)
+server.use("/checkout",checkoutRoutes)
 
 
 

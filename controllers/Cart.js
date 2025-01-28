@@ -14,8 +14,9 @@ const Cart = require("../models/Cart");
 exports.create = async (req, res) => {
   try {
     const { user, product, size, quantity } = req.body;
+    
 
-    console.log(req.body);
+   
 
     //checking if the product is already in the cart
     let cartItem = await Cart.findOne({ user, product, size });

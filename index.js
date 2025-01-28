@@ -13,6 +13,7 @@ const userRoutes=require("./routes/User")
 const addressRoutes=require('./routes/Address')
 const reviewRoutes=require("./routes/Review")
 const wishlistRoutes=require("./routes/Wishlist")
+const checkoutRoutes=require("./routes/Checkout")
 const { connectToDB } = require("./database/db")
 
 

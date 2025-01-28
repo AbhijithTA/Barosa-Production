@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const checkoutController = require("../controllers/Checkout");
+const checkoutController = require("../controllers/Checkout.js");
 
 router.post(
   "/create-checkout-session",

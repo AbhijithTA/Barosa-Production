@@ -4,16 +4,11 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.createCheckoutSession = async (req, res) => {
   try {
-    
     const { products, order } = req.body;
     // validating the request body
     if (!products || !order) {
       return res.status(400).json({ message: "Invalid request body" });
     }
-
-    //creating the order in the database
-    // const newOrder = new Order(Order);
-    // await newOrder.save();
 
     // creating the line items array
     const lineItems = products.map((item) => ({
@@ -33,8 +28,8 @@ exports.createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: 'http://localhost:3000/order-success/{CHECKOUT_SESSION_ID}',
-      cancel_url: 'http://localhost:3000/cart',
+      success_url: "http://localhost:3000/order-success/{CHECKOUT_SESSION_ID}",
+      cancel_url: "http://localhost:3000/cart",
       metadata: {
         order_id: order._id,
       },
@@ -45,5 +40,33 @@ exports.createCheckoutSession = async (req, res) => {
   } catch (err) {
     console.error("Error creating checkout session  ", err);
     res.status(500).json({ error: "Failed to create checkout session" });
+  }
+};
+
+exports.getOrderBySessionId = async (req, res) => {
+  try {
+    const { session_id } = req.query;
+    if (!session_id) {
+      return res.status(400).json({ message: "Session ID is required" });
+    }
+
+    //Retriving the stripe session
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
+    if (!session || !session.metadata.order_id) {
+      return res.status(400).json({ message: "Order not found" });
+    }
+
+    //fetch the order using order_id from metadata
+    const order = await Order.findById(session.metadata.order_id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json({ order });
+  } catch (error) {
+    console.error("Error fetching order by session ID", err);
+    res.status(500).json({ error: "Failed to fetch order details" });
   }
 };

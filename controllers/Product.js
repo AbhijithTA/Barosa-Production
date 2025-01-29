@@ -16,7 +16,7 @@ exports.create = async (req, res) => {
     images,
   } = req.body;
 
-  console.log(req.body);
+ 
 
   try {
     // Validate required fields
@@ -66,7 +66,7 @@ exports.create = async (req, res) => {
       price: parseFloat(price), // Ensure price is a number
       discountPercentage: parseFloat(discountPercentage), // Ensure discountPercentage is a number
       category,
-      SubCategory: subCategory,
+      subcategory: subCategory,
       stockQuantity: stockQuantityMap,
       thumbnail,
       images,

@@ -5,7 +5,7 @@ const Order = require("../models/Order");
 exports.create = async (req, res) => {
   try {
     const { user, items, address, paymentMode, total } = req.body;
-    console.log(req.body,"This is the req body when order is created");
+    console.log(req.body, "This is the req body when order is created");
 
     //Validating required fields
     if (!user || !items || !address || !paymentMode || !total) {
@@ -52,16 +52,38 @@ exports.getByUserId = async (req, res) => {
   try {
     const { id } = req.params;
     const results = await Order.find({ user: id }).populate({
-      path:"items.product",
-      model:"Product",
+      path: "items.product",
+      model: "Product",
     });
-    
+
     res.status(200).json(results);
   } catch (error) {
     console.log(error);
     return res
       .status(500)
       .json({ message: "Error fetching orders, please trying again later" });
+  }
+};
+
+
+
+exports.getByOrderId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById( id ).populate({
+      path: "items.product",
+      model: "Product",
+    });
+
+    if(!order){
+      return res.status(404).json({message:"Order not found"});
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error fetching orders, please try again later" });
   }
 };
 

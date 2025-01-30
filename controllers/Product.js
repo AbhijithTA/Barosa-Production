@@ -90,7 +90,7 @@ exports.getAll = async (req, res) => {
     let skip = 0;
     let limit = 0;
 
-    // filter by category or subCategory
+    // Ensure both category and subCategory are applied correctly
     if (req.query.category) {
       filter.category = req.query.category;
 
@@ -99,53 +99,37 @@ exports.getAll = async (req, res) => {
       }
     }
 
-    //if a subCategory is provied without a matching category
     if (!req.query.category && req.query.subCategory) {
       return res
         .status(400)
         .json({ message: "Please provide a category with the subCategory" });
     }
 
-    if (req.query.user) {
-      filter["isDeleted"] = false;
-    }
-
     if (req.query.sort) {
-      sort[req.query.sort] = req.query.order
-        ? req.query.order === "asc"
-          ? 1
-          : -1
-        : 1;
+      sort[req.query.sort] = req.query.order === "asc" ? 1 : -1;
     }
 
     if (req.query.page && req.query.limit) {
-      const pageSize = req.query.limit;
-      const page = req.query.page;
-
+      const pageSize = parseInt(req.query.limit, 10) || 10;
+      const page = parseInt(req.query.page, 10) || 1;
       skip = pageSize * (page - 1);
       limit = pageSize;
     }
 
-    const totalDocs = await Product.find(filter)
-      .sort(sort)
-      .countDocuments()
-      .exec();
-    const results = await Product.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .exec();
+    // Ensure the filter is working properly
+    console.log("Filter used:", filter);
+
+    const totalDocs = await Product.countDocuments(filter);
+    const results = await Product.find(filter).sort(sort).skip(skip).limit(limit);
 
     res.set("X-Total-Count", totalDocs);
-
     res.status(200).json(results);
   } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ message: "Error fetching products, please try again later" });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Error fetching products, please try again later" });
   }
 };
+
 
 exports.getById = async (req, res) => {
   try {

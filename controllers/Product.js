@@ -16,8 +16,6 @@ exports.create = async (req, res) => {
     images,
   } = req.body;
 
- 
-
   try {
     // Validate required fields
     if (
@@ -89,17 +87,19 @@ exports.getAll = async (req, res) => {
     const sort = {};
     let skip = 0;
     let limit = 0;
+    
+    console.log(req.query, "This is the query");
 
     // Ensure both category and subCategory are applied correctly
     if (req.query.category) {
       filter.category = req.query.category;
 
-      if (req.query.subCategory) {
-        filter.subCategory = req.query.subCategory;
+      if (req.query.subcategory) {
+        filter.subcategory = req.query.subcategory;
       }
     }
 
-    if (!req.query.category && req.query.subCategory) {
+    if (!req.query.category && req.query.subcategory) {
       return res
         .status(400)
         .json({ message: "Please provide a category with the subCategory" });
@@ -116,20 +116,21 @@ exports.getAll = async (req, res) => {
       limit = pageSize;
     }
 
-    // Ensure the filter is working properly
-    console.log("Filter used:", filter);
-
     const totalDocs = await Product.countDocuments(filter);
-    const results = await Product.find(filter).sort(sort).skip(skip).limit(limit);
+    const results = await Product.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
 
     res.set("X-Total-Count", totalDocs);
     res.status(200).json(results);
   } catch (error) {
     console.error("Error fetching products:", error);
-    res.status(500).json({ message: "Error fetching products, please try again later" });
+    res
+      .status(500)
+      .json({ message: "Error fetching products, please try again later" });
   }
 };
-
 
 exports.getById = async (req, res) => {
   try {

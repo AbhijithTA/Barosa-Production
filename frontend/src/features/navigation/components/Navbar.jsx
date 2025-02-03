@@ -136,7 +136,7 @@ export const Navbar = () => {
 
         <div className="flex justify-center">
           <Link to="/">
-            <h2 className="text-2xl font-bold text-black">BAROZA</h2>
+            <h2 className="text-2xl font-bold text-black">BAROSA</h2>
           </Link>
         </div>
 

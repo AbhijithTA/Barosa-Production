@@ -88,7 +88,7 @@ export const Footer = () => {
 
             {/* lower */}
             <Stack alignSelf={"center"}>
-                <Typography color={'GrayText'}>&copy; Baroza Store {new Date().getFullYear()}. All right reserved</Typography>
+                <Typography color={'GrayText'}>&copy; Barosa Store {new Date().getFullYear()}. All right reserved</Typography>
             </Stack>
 
     </Stack>

@@ -214,7 +214,7 @@ export const Navbar = () => {
             </svg>
           </button>
           {mobileMenuOpen && (
-            <div className="absolute top-16 right-0 w-64 h-screen bg-white shadow-lg z-50">
+            <div className="fixed top-16 left-0 w-full h-screen bg-white shadow-lg z-50 overflow-y-auto">
               <div className="py-4 px-6">
                 <h1 className="font-semibold">Hey {loggedInUser?.name}</h1>
                 <Link to="/" className="block text-black mt-4 font-semibold">

@@ -2,27 +2,29 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import CategoryCard from "./NewArrivalCategoryCard";
 
+
+
 const categories = [
   {
     title: "Mens",
     buttonText: "VIEW PRODUCTS",
-    image: "https://img.freepik.com/free-photo/vertical-shot-successful-male-standing-with-hand-pocket_181624-44739.jpg?uid=P153408150&semt=ais_hybrid", // Replace with actual image URL
+    image: "https://img.freepik.com/free-photo/smart-man-with-hands-pockets_1153-1934.jpg?ga=GA1.1.793373529.1738067234&semt=ais_hybrid_sidr"
     
   },
   {
     title: "Women",
     buttonText: "VIEW PRODUCTS",
-    image: "https://img.freepik.com/premium-photo/beautiful-woman-with-clean-skin-poses-street-city_333900-4297.jpg?uid=P153408150&semt=ais_hybrid", // Replace with actual image URL
+    image: "https://img.freepik.com/premium-photo/fashion-model-outdoor-portrait-young-beautiful-woman-wearing-straw-hat-holding-backpack_106029-853.jpg?ga=GA1.1.793373529.1738067234&semt=ais_hybrid_sidr", 
   },
   {
     title: "Kids",
     buttonText: "VIEW PRODUCTS",
-    image: "https://img.freepik.com/free-photo/child-pajama_146671-13730.jpg?uid=P153408150&semt=ais_hybrid", // Replace with actual image URL
+    image: "https://img.freepik.com/premium-photo/cute-little-girl-dress-sunglasses-little-boy-summer-stylish-overalls-sunglasses-isolated-full-length-pink-background_179135-424.jpg?ga=GA1.1.793373529.1738067234&semt=ais_hybrid_sidr", 
   },
   {
     title: "Gifts",
     buttonText: "VIEW PRODUCTS",
-    image: "https://img.freepik.com/free-photo/front-view-smiling-cute-kid-riding-green-skateboard-white-t-shirt-orange-shorts-blue-space_179666-1170.jpg?uid=P153408150&semt=ais_hybrid", // Replace with actual image URL
+    image: "https://img.freepik.com/free-photo/merry-christmas-new-year-holidays-concept-excited-young-woman-bring-gifts-holding-xmas-presents-smiling-camera-wearing-black-dress-white-background_1258-41106.jpg?ga=GA1.1.793373529.1738067234&semt=ais_hybrid_sidr", 
   },
   
 ];

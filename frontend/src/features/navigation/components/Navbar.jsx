@@ -66,77 +66,93 @@ export const Navbar = () => {
   };
 
   const toggleSubCategory = (subcategory) => {
-    setExpandedSubCategory((prev) => (prev === subcategory ? null : subcategory));
+    setExpandedSubCategory((prev) =>
+      prev === subcategory ? null : subcategory
+    );
   };
 
   return (
     <div className="fixed top-0 w-full h-16 bg-white text-black shadow-md z-50">
       <div className="container mx-auto flex items-center justify-between px-4 md:px-8 h-full">
         {/* Desktop Links */}
-        <div className="hidden md:flex gap-8 items-center">
-          <div className="relative dropdown-container">
-            <button
-              className="flex items-center text-sm font-medium hover:text-gray-600"
-              onClick={() => setShopDropdown(!shopDropdown)}
-            >
-              SHOP
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${
-                  shopDropdown ? "rotate-180" : "rotate-0"
-                }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        {!loggedInUser?.isAdmin && (
+          <div className="hidden md:flex gap-8 items-center">
+            <div className="relative dropdown-container">
+              <button
+                className="flex items-center text-sm font-medium hover:text-gray-600"
+                onClick={() => setShopDropdown(!shopDropdown)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {shopDropdown && (
-              <div className="absolute left-0 bg-white shadow-lg z-10 w-[96vw] mt-4 flex flex-wrap justify-between py-8 px-8">
-                {categories.map((category) => (
-                  <div key={category._id} className="w-1/4 flex flex-col items-start">
-                    <h1 className="font-semibold text-lg text-black mb-2">
-                      {category.name}
-                    </h1>
-                    <ul className="text-sm text-gray-700">
-                      {category.subCategory.map((sub) => (
-                        <li
-                          key={sub._id}
-                          className="hover:text-black mb-1"
-                          onClick={() =>
-                            navigate(`/categories/${category.name}/${sub.name}`)
-                          }
-                        >
-                          {sub.name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            )}
+                SHOP
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${
+                    shopDropdown ? "rotate-180" : "rotate-0"
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              {shopDropdown && (
+                <div className="absolute left-0 bg-white shadow-lg z-10 w-[96vw] mt-4 flex flex-wrap justify-between py-8 px-8">
+                  {categories.map((category) => (
+                    <div
+                      key={category._id}
+                      className="w-1/4 flex flex-col items-start"
+                    >
+                      <h1 className="font-semibold text-lg text-black mb-2">
+                        {category.name}
+                      </h1>
+                      <ul className="text-sm text-gray-700">
+                        {category.subCategory.map((sub) => (
+                          <li
+                            key={sub._id}
+                            className="hover:text-black mb-1"
+                            onClick={() =>
+                              navigate(
+                                `/categories/${category.name}/${sub.name}`
+                              )
+                            }
+                          >
+                            {sub.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link
+              to="/about-us"
+              className="text-sm font-medium hover:text-gray-600"
+            >
+              ABOUT
+            </Link>
+            <Link
+              to="/contact-us"
+              className="text-sm font-medium hover:text-gray-600"
+            >
+              CONTACT
+            </Link>
+            <Link to="/" className="text-sm font-medium hover:text-gray-600">
+              MORE
+            </Link>
           </div>
-
-          <Link to="/about-us" className="text-sm font-medium hover:text-gray-600">
-            ABOUT
-          </Link>
-          <Link to="/contact-us" className="text-sm font-medium hover:text-gray-600">
-            CONTACT
-          </Link>
-          <Link to="/" className="text-sm font-medium hover:text-gray-600">
-            MORE
-          </Link>
-        </div>
-
+        )}
         <div className="flex justify-center">
           <Link to="/">
-            <h2 className="text-2xl font-bold text-black">BAROSA</h2>
+            <h2 className="text-2xl font-bold text-black">
+              {loggedInUser?.isAdmin ? "Admin" : "BAROSA"}
+            </h2>
           </Link>
         </div>
 
@@ -298,7 +314,10 @@ export const Navbar = () => {
                 >
                   About
                 </Link>
-                <Link to="/contact-us" className="block text-black font-semibold">
+                <Link
+                  to="/contact-us"
+                  className="block text-black font-semibold"
+                >
                   Contact
                 </Link>
               </div>

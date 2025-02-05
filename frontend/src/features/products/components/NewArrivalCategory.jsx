@@ -36,7 +36,7 @@ const NewArrivalCategory = () => {
 
   return (
     <div className="px-6 md:px-12">
-        <h1 className="text-2xl font-semibold text-center mb-10">New Arrivals</h1>
+        <h1 className="text-3xl font-semibold text-center mb-10 w-full">New Arrivals</h1>
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
         {categories.map((category, index) => (
           <CategoryCard

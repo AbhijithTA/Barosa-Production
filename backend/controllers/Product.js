@@ -169,7 +169,7 @@ exports.undeleteById = async (req, res) => {
       id,
       { isDeleted: false },
       { new: true }
-    ).populate("brand");
+    );
     res.status(200).json(unDeleted);
   } catch (error) {
     console.log(error);
@@ -186,7 +186,7 @@ exports.deleteById = async (req, res) => {
       id,
       { isDeleted: true },
       { new: true }
-    ).populate("brand");
+    );
     res.status(200).json(deleted);
   } catch (error) {
     console.log(error);

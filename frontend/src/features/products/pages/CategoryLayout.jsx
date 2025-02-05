@@ -173,9 +173,10 @@ const CategoryLayout = () => {
               Failed to load products. Please try again later.
             </p>
           ) : (
-            <Grid container spacing={2} justifyContent="center">
+            <Grid container spacing={2} justifyContent="center" sx={{ padding:"16px"}}>
               {products.length > 0 ? (
                 products.map((product) => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
                   <ProductCard
                     key={product._id}
                     id={product._id}
@@ -184,6 +185,7 @@ const CategoryLayout = () => {
                     price={product.price}
                     handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}
                   />
+                  </Grid>
                 ))
               ) : (
                 <p className="text-center text-gray-500 w-full">

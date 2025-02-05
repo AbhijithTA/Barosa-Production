@@ -102,7 +102,7 @@ export const UserOrders = () => {
                                             </Stack>
                                             <Stack>
                                                 <Typography>Total Amount</Typography>
-                                                <Typography>${order.total.toFixed(2)}</Typography>
+                                                <Typography>AED {order.total.toFixed(2)}</Typography>
                                             </Stack>
                                         </Stack>
                                         <Stack>
@@ -125,10 +125,10 @@ export const UserOrders = () => {
                                                     <Stack flexDirection={'row'} justifyContent={'space-between'}>
                                                         <Stack>
                                                             <Typography variant='h6' fontSize={'1rem'} fontWeight={500}>{product.product.title}</Typography>
-                                                            <Typography variant='body1' fontSize={'.9rem'} color={'text.secondary'}>{product.product.brand?.name || "No Brand"}</Typography>
+                                            
                                                             <Typography color={'text.secondary'} fontSize={'.9rem'}>Qty: {product.quantity}</Typography>
                                                         </Stack>
-                                                        <Typography>${product?.product?.price?.toFixed(2)}</Typography>
+                                                        <Typography>AED {product?.product?.price?.toFixed(2)}</Typography>
                                                     </Stack>
                                                     <Typography color={'text.secondary'}>{product.product.description}</Typography>
                                                     <Stack mt={2} alignSelf={is480 ? "flex-start" : 'flex-end'} flexDirection={'row'} columnGap={2}>

@@ -68,7 +68,7 @@ export const ProductUpdate = () => {
       reset(selectedProduct);
       setSelectedCategoryId(selectedProduct.category?._id || "");
       setSelectedSubcategoryId(
-        selectedProduct?.category?.subCategory?._id || ""
+       selectedProduct.subcategory?._id || ""
       );
       setThumbnail(selectedProduct.thumbnail || "");
       setUploadedImageUrls(selectedProduct.images || []);
@@ -162,7 +162,7 @@ export const ProductUpdate = () => {
   };
 
   console.log(selectedProduct, "selectedProduct");
-  console.log(selectedSubcategoryId, "selectedSubcategoryId");
+  
 
 
   return (

@@ -38,7 +38,7 @@ import {
 } from "./pages";
 import { AdminCateogryPage } from "./pages/AdminCategoryPage";
 
-import { Navbar } from "./features/navigation/components/Navbar";
+
 import CategroryLayout from "./features/products/pages/CategoryLayout";
 import SubcategoryLayout from "./features/products/pages/SubCategoryLayout";
 import { AboutUsPage } from "./pages/AboutUsPage";

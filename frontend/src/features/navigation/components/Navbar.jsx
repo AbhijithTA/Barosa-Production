@@ -110,7 +110,7 @@ export const Navbar = () => {
                       <h1 className="font-semibold text-lg text-black mb-2">
                         {category.name}
                       </h1>
-                      <ul className="text-sm text-gray-700">
+                      <ul className="text-sm text-gray-700 cursor-pointer">
                         {category.subCategory.map((sub) => (
                           <li
                             key={sub._id}

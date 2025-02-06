@@ -10,7 +10,7 @@ const categories = [
       "https://img.freepik.com/free-photo/vertical-shot-successful-male-standing-with-hand-pocket_181624-44739.jpg?uid=P153408150&semt=ais_hybrid",
   },
   {
-    Title: "Ladies/Top",
+    Title: "Women/Top",
     displayTitle: "Ladies' Tops",
     buttonText: "VIEW PRODUCTS",
     image:

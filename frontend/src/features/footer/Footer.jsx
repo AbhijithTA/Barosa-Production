@@ -1,5 +1,4 @@
 import {
-  Box,
   IconButton,
   TextField,
   Typography,
@@ -9,9 +8,6 @@ import {
 import { Stack } from "@mui/material";
 import React from "react";
 import {
-  QRCodePng,
-  appStorePng,
-  googlePlayPng,
   facebookPng,
   instagramPng,
   twitterPng,
@@ -75,7 +71,7 @@ export const Footer = () => {
           <Typography sx={labelStyles}>
             11th Main Street, Dhaka, DH 1515, UAE.
           </Typography>
-          <Typography sx={labelStyles}>exclusive@gmail.com</Typography>
+          <Typography sx={labelStyles}>barosatrendz@gmail.com</Typography>
           <Typography sx={labelStyles}>+88015-88888-9999</Typography>
         </Stack>
 

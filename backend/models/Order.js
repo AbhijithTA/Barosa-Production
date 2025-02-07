@@ -9,7 +9,7 @@ const orderSchema = new Schema(
       required: true,
     },
     items: {
-      // Change from `item` to `items`
+      
       type: [
         {
           product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
@@ -20,7 +20,7 @@ const orderSchema = new Schema(
       required: true,
     },
     address: {
-      // Change from array to a single object
+    
       type: Schema.Types.Mixed,
       required: true,
     },

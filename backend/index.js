@@ -25,12 +25,12 @@ connectToDB();
 // CORS Configuration
 server.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');  // Read allowed origins from the .env file
+        const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');  
 
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {  // Allow requests from specified origins
-            callback(null, true);  // Allow the request
+        if (allowedOrigins.indexOf(origin) !== -1 || !origin) { 
+            callback(null, true);  
         } else {
-            callback(new Error('Not allowed by CORS'));  // Reject the request
+            callback(new Error('Not allowed by CORS'));  
         }
     },
     credentials: true,

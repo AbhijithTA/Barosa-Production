@@ -90,8 +90,11 @@ export const Checkout = () => {
   };
 
   const cardPayment = async (order) => {
+    // const stripe = await loadStripe(
+    //   "pk_test_51QjOA0GSJadpZs7UjNwfZavVBqN4AH2FDxM5TopwdWTLcUwPxOap3jBhxHiK1RjVpIG5llYMkLGMbODqHOhW7SAV00xMAlfftf"
+    // );
     const stripe = await loadStripe(
-      "pk_test_51QjOA0GSJadpZs7UjNwfZavVBqN4AH2FDxM5TopwdWTLcUwPxOap3jBhxHiK1RjVpIG5llYMkLGMbODqHOhW7SAV00xMAlfftf"
+      "pk_live_51QjOA0GSJadpZs7U3LiJV58oh3a8CMiUrGazsBZyfPY4ZUJZXFpQYtmAOdYsTQKRsTVb2sdjHeGBz7nFe8txEWsp00cTrsXdB1"
     );
 
     try {

@@ -98,7 +98,7 @@ export const AdminOrders = () => {
     }
   };
 
-  console.log(orders, "orders");
+ 
   return (
     <Stack justifyContent={"center"} alignItems={"center"}>
       <Stack

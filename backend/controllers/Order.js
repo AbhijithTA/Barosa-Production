@@ -65,18 +65,16 @@ exports.getByUserId = async (req, res) => {
   }
 };
 
-
-
 exports.getByOrderId = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findById( id ).populate({
+    const order = await Order.findById(id).populate({
       path: "items.product",
       model: "Product",
     });
 
-    if(!order){
-      return res.status(404).json({message:"Order not found"});
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
     }
 
     res.status(200).json(order);
@@ -100,7 +98,11 @@ exports.getAll = async (req, res) => {
     }
 
     const totalDocs = await Order.find({}).countDocuments().exec();
-    const results = await Order.find({}).skip(skip).limit(limit).exec();
+    const results = await Order.find({})
+      .skip(skip)
+      .limit(limit)
+      .populate("items.product")
+      .exec();
 
     res.header("X-Total-Count", totalDocs);
     res.status(200).json(results);

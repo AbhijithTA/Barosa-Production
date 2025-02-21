@@ -87,19 +87,17 @@ exports.getAll = async (req, res) => {
     const sort = {};
     let skip = 0;
     let limit = 0;
-    
-    console.log(req.query, "This is the query");
 
     // Ensure both category and subCategory are applied correctly
     if (req.query.category) {
       filter.category = req.query.category;
 
-      if (req.query.subcategory) {
-        filter.subcategory = req.query.subcategory;
+      if (req.query.subCategory) {
+        filter.subcategory = req.query.subCategory;
       }
     }
 
-    if (!req.query.category && req.query.subcategory) {
+    if (!req.query.category && req.query.subCategory) {
       return res
         .status(400)
         .json({ message: "Please provide a category with the subCategory" });
@@ -202,7 +200,10 @@ exports.getFeaturedProducts = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
 
     const startIndex = (page - 1) * limit;
-    const featuredProducts = await Product.find({ isFeatured: true })
+    const featuredProducts = await Product.find({
+      isFeatured: true,
+      isDeleted: { $ne: true },
+    })
       .skip(startIndex)
       .limit(limit);
 

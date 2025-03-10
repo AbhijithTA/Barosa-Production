@@ -24,7 +24,7 @@ import {
 import { selectLoggedInUser } from "../../auth/AuthSlice";
 
 const CategoryLayout = () => {
-  const { categoryTitle } = useParams();
+  const { categoryTitle, subcategoryTitle } = useParams();
   const [products, setProducts] = useState([]);
   const [fetchStatus, setFetchStatus] = useState("idle");
   const [categories, setCategories] = useState([]);
@@ -68,29 +68,37 @@ const CategoryLayout = () => {
 
   // Fetch products
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setFetchStatus("pending");
+    if (!subcategoryTitle) {
+      const fetchProducts = async () => {
+        try {
+          setFetchStatus("pending");
 
-        const params = sort ? { sort: sort.sort, order: sort.order } : {};
-        const productResponse = await axiosi.get(
-          `/products/latest-products/${categoryTitle}`,
-          { params }
-        );
+          const productResponse = await axiosi.get("/products", {
+            params: {
+              category: categoryTitle,
+              subCategory: subcategoryTitle || undefined,
+              sort: sort?.sort,
+              order: sort?.order,
+            },
+          });
+          setProducts(productResponse.data);
+          setFetchStatus("fulfilled");
+        } catch (error) {
+          console.error("Error fetching products:", error);
+          setFetchStatus("error");
+        }
+      };
 
-        setProducts(productResponse.data);
-        setFetchStatus("fulfilled");
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        setFetchStatus("error");
-      }
-    };
-
-    fetchProducts();
-  }, [categoryTitle, sort]);
+      fetchProducts();
+    } else {
+      setProducts([]);
+      setFetchStatus("idle");
+    }
+  }, [categoryTitle, sort, subcategoryTitle]);
 
   const handleSubCategoryClick = (subcategoryTitle) => {
-    navigate(`/categories/${categoryTitle}/${subcategoryTitle}`);
+    const encodedName = encodeURIComponent(subcategoryTitle);
+    navigate(`/categories/${categoryTitle}/${encodedName}`);
   };
 
   const handleAddRemoveFromWishlist = (e, productId) => {
@@ -162,37 +170,52 @@ const CategoryLayout = () => {
           </Stack>
 
           {/* Render Products or Subcategory Layout */}
-          <Outlet context={{ categories, subCategories }} />
-
-          {fetchStatus === "pending" ? (
-            <Stack alignItems="center" justifyContent="center" height="50vh">
-              <Lottie animationData={loadingAnimation} />
-            </Stack>
-          ) : fetchStatus === "error" ? (
-            <p className="text-center text-red-500">
-              Failed to load products. Please try again later.
-            </p>
+          {subcategoryTitle ? (
+            <Outlet context={{ categories, subCategories }} />
           ) : (
-            <Grid container spacing={2} justifyContent="center" sx={{ padding:"16px"}}>
-              {products.length > 0 ? (
-                products.map((product) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
-                  <ProductCard
-                    key={product._id}
-                    id={product._id}
-                    title={product.title}
-                    thumbnail={product.thumbnail}
-                    price={product.price}
-                    handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}
-                  />
-                  </Grid>
-                ))
-              ) : (
+            <>
+              {fetchStatus === "pending" ? (
+                <Stack
+                  alignItems="center"
+                  justifyContent="center"
+                  height="50vh"
+                >
+                  <Lottie animationData={loadingAnimation} />
+                </Stack>
+              ) : fetchStatus === "error" ? (
+                <p className="text-center text-red-500">
+                  Failed to load products. Please try again later.
+                </p>
+              ) : products.length > 0 ? (
+                <Grid
+                  container
+                  spacing={2}
+                  justifyContent="center"
+                  sx={{ padding: "16px" }}
+                >
+                  {products.map((product) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
+                      <ProductCard
+                        id={product._id}
+                        title={product.title}
+                        thumbnail={product.thumbnail}
+                        price={product.price}
+                        handleAddRemoveFromWishlist={
+                          handleAddRemoveFromWishlist
+                        }
+                        onClick={() =>
+                          navigate(`/product-details/${product._id}`)
+                        }
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : fetchStatus === "fulfilled" ? (
                 <p className="text-center text-gray-500 w-full">
                   No products found for this category.
                 </p>
-              )}
-            </Grid>
+              ) : null}
+            </>
           )}
         </div>
       </div>

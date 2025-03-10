@@ -43,7 +43,7 @@ import { axiosi } from "../../../config/axios";
 export const Checkout = () => {
   const status = "";
   const addresses = useSelector(selectAddresses);
-  const [selectedAddress, setSelectedAddress] = useState(addresses[0]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cash");
   const {
     register,
@@ -84,9 +84,15 @@ export const Checkout = () => {
     loggedInUser._id,
   ]);
 
-  const handleAddAddress = (data) => {
+  const handleAddAddress = async (data) => {
     const address = { ...data, user: loggedInUser._id };
-    dispatch(addAddressAsync(address));
+    const resultAction = await dispatch(addAddressAsync(address));
+
+    if (addAddressAsync.fulfilled.match(resultAction)) {
+      reset();
+    } else {
+      alert("Error adding your address");
+    }
   };
 
   const cardPayment = async (order) => {
@@ -170,6 +176,12 @@ export const Checkout = () => {
       dispatch(createOrderAsync(order));
     }
   };
+
+  useEffect(() => {
+    if (addresses.length > 0) {
+      setSelectedAddress(addresses[0]);
+    }
+  },[addresses]);
 
   return (
     <Stack

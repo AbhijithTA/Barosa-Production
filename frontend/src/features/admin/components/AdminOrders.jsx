@@ -108,7 +108,7 @@ export const AdminOrders = () => {
         noValidate
         onSubmit={handleSubmit(handleUpdateOrder)}
       >
-        {orders.length ? (
+        {orders?.length ? (
           <TableContainer
             sx={{ width: is1620 ? "95vw" : "auto", overflowX: "auto" }}
             component={Paper}
@@ -131,8 +131,8 @@ export const AdminOrders = () => {
               </TableHead>
 
               <TableBody>
-                {orders.length &&
-                  orders.map((order, index) => (
+                {orders?.length &&
+                  orders?.map((order, index) => (
                     <TableRow
                       key={order._id}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -157,8 +157,8 @@ export const AdminOrders = () => {
                             columnGap={2}
                             key={product._id}
                           >
-                            <Avatar src={product.product.thumbnail}></Avatar>
-                            <Typography>{product.product.title}</Typography>
+                            <Avatar src={product?.product?.thumbnail}></Avatar>
+                            <Typography>{product?.product?.title}</Typography>
                           </Stack>
                         ))}
                       </TableCell>

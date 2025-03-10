@@ -63,6 +63,7 @@ export const ProductCard = ({
     }
   };
 
+  
   return (
     <>
       {isProductAlreadyinWishlist !== -1 ? (

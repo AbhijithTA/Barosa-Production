@@ -226,7 +226,7 @@ exports.getFeaturedProducts = async (req, res) => {
 
 exports.getLatestProducts = async (req, res) => {
   const categoryName = req.params.category;
-  console.log(categoryName);
+  
 
   try {
     const category = await Category.findOne({ name: categoryName });

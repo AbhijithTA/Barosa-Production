@@ -5,25 +5,39 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Stack } from "@mui/material";
+import { Stack, Box } from "@mui/material";
 import React from "react";
-import {
-  facebookPng,
-  instagramPng,
-  twitterPng,
-  linkedinPng,
-} from "../../assets";
+import { facebookPng, instagramPng, tiktok } from "../../assets";
 import SendIcon from "@mui/icons-material/Send";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
 import { MotionConfig, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export const Footer = () => {
   const theme = useTheme();
   const is700 = useMediaQuery(theme.breakpoints.down(700));
+  const is480 = useMediaQuery(theme.breakpoints.down(480));
 
   const labelStyles = {
     fontWeight: 300,
     cursor: "pointer",
+    transition: "color 0.3s ease",
+    "&:hover": {
+      color: theme.palette.secondary.main,
+    },
+  };
+
+  const contactItemStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    marginBottom: "0.5rem",
+    transition: "transform 0.2s ease",
+    "&:hover": {
+      transform: "translateX(5px)",
+    },
   };
 
   return (
@@ -54,7 +68,13 @@ export const Footer = () => {
           <Typography sx={labelStyles}>Get 10% off your first order</Typography>
           <TextField
             placeholder="Enter your email"
-            sx={{ border: "1px solid white", borderRadius: "6px" }}
+            sx={{
+              border: "1px solid white",
+              borderRadius: "6px",
+              "&:hover": {
+                boxShadow: "0 0 8px rgba(255,255,255,0.3)",
+              },
+            }}
             InputProps={{
               endAdornment: (
                 <IconButton>
@@ -66,27 +86,52 @@ export const Footer = () => {
           />
         </Stack>
 
-        <Stack rowGap={"1rem"} padding={"1rem"}>
-          <Typography variant="h6">Support</Typography>
-          <Typography sx={labelStyles}>
-            11th Main Street, Dhaka, DH 1515, UAE.
+        <Stack
+          rowGap={"1rem"}
+          padding={"1rem"}
+          width={is480 ? "100%" : "auto"}
+          maxWidth="280px"
+        >
+          <Typography variant="h6" sx={{ marginBottom: "0.5rem" }}>
+            Support
           </Typography>
-          <Typography sx={labelStyles}>barosatrendz@gmail.com</Typography>
-          <Typography sx={labelStyles}>+88015-88888-9999</Typography>
+
+          <Box sx={contactItemStyle}>
+            <LocationOnIcon sx={{ color: theme.palette.secondary.main }} />
+            <Typography sx={{ ...labelStyles, lineHeight: "1.6" }}>
+              Barosa Trendz Fashion,
+              <br />
+              Al Zahiryah E1602,
+              <br />
+              Navigate area,
+              <br />
+              Abu Dhabi
+            </Typography>
+          </Box>
+
+          <Box sx={contactItemStyle}>
+            <EmailIcon sx={{ color: theme.palette.secondary.main }} />
+            <Typography sx={labelStyles}>barosatrendz@gmail.com</Typography>
+          </Box>
+
+          <Box sx={contactItemStyle}>
+            <PhoneIcon sx={{ color: theme.palette.secondary.main }} />
+            <Typography sx={labelStyles}>+971 56 643 4873</Typography>
+          </Box>
         </Stack>
 
         <Stack rowGap={"1rem"} padding={"1rem"}>
           <Typography variant="h6">Account</Typography>
-          <Link to="/my-account">
+          <Link to="/my-account" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>My Account</Typography>
           </Link>
-          <Link to="/login">
+          <Link to="/login" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>Login / Register</Typography>
           </Link>
-          <Link to="/cart">
+          <Link to="/cart" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>Cart</Typography>
           </Link>
-          <Link to="/wishlist">
+          <Link to="/wishlist" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>Wishlist</Typography>
           </Link>
         </Stack>
@@ -96,7 +141,7 @@ export const Footer = () => {
           <Typography sx={labelStyles}>Privacy Policy</Typography>
           <Typography sx={labelStyles}>Terms Of Use</Typography>
           <Typography sx={labelStyles}>FAQ</Typography>
-          <Link to="/contact-us">
+          <Link to="/contact-us" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>Contact</Typography>
           </Link>
         </Stack>
@@ -104,29 +149,53 @@ export const Footer = () => {
         <Stack rowGap={"1rem"} padding={"1rem"}>
           <Typography variant="h6">Follow Us On</Typography>
 
-          <Stack mt={0.6} flexDirection={"row"} columnGap={"2rem"}>
-            <MotionConfig whileHover={{ scale: 1.1 }} whileTap={{ scale: 1 }}>
+          <Stack
+            mt={0.6}
+            flexDirection={"row"}
+            columnGap={"1rem"}
+            flexWrap="wrap"
+          >
+            <a
+              href="https://www.facebook.com/people/Barosa-Trendz/61573365819717/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <motion.img
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
                 style={{ cursor: "pointer" }}
                 src={facebookPng}
                 alt="Facebook"
               />
+            </a>
+
+            <a
+              href="https://www.instagram.com/barosatrendz/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <motion.img
-                style={{ cursor: "pointer" }}
-                src={twitterPng}
-                alt="Twitter"
-              />
-              <motion.img
-                style={{ cursor: "pointer" }}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+                style={{ cursor: "pointer",width:"20px",height:"20px" }}
                 src={instagramPng}
                 alt="Instagram"
               />
+            </a>
+            
+            <a
+              href="https://www.tiktok.com/@barosatrendz"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <motion.img
-                style={{ cursor: "pointer" }}
-                src={linkedinPng}
-                alt="Linkedin"
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+                style={{ cursor: "pointer",width:"20px",height:"20px" }}
+                src={tiktok}
+                alt="TikTok"
               />
-            </MotionConfig>
+            </a>
           </Stack>
         </Stack>
       </Stack>

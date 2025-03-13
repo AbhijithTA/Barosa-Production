@@ -16,6 +16,7 @@ import banner2 from './images/banner2.jpg'
 import banner3 from './images/banner3.jpg'
 import banner4 from './images/banner4.jpg'
 import loadingAnimation from './animations/loading.json'
+import tiktok from './images/tiktok.jpg'
 
 export {
     ecommerceOutlookAnimation,
@@ -35,5 +36,6 @@ export {
     banner2,
     banner3,
     banner4,
-    loadingAnimation
+    loadingAnimation,
+    tiktok
 }

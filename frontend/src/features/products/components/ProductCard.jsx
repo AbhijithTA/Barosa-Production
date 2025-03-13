@@ -7,7 +7,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
@@ -17,6 +17,9 @@ import { selectWishlistItems } from "../../wishlist/WishlistSlice";
 import { selectLoggedInUser } from "../../auth/AuthSlice";
 import { addToCartAsync, selectCartItems } from "../../cart/CartSlice";
 import { motion } from "framer-motion";
+
+// toast import
+import { useToast } from "../../../components/ToastProvider";
 
 export const ProductCard = ({
   id,
@@ -35,6 +38,10 @@ export const ProductCard = ({
   const cartItems = useSelector(selectCartItems);
   const dispatch = useDispatch();
   let isProductAlreadyinWishlist = -1;
+  const [selectedSize, setSelectedSize] = useState(null);
+
+  // toast
+  const { showToast } = useToast();
 
   const theme = useTheme();
   const is1410 = useMediaQuery(theme.breakpoints.down(1410));
@@ -57,13 +64,18 @@ export const ProductCard = ({
     e.stopPropagation();
     if (!loggedInUser) {
       navigate("/login");
-    } else {
-      const data = { user: loggedInUser?._id, product: id };
-      dispatch(addToCartAsync(data));
+      return;
     }
+    if (!selectedSize) {
+      showToast("Please select a size before adding to cart", "error");
+      return;
+    }
+
+    const data = { user: loggedInUser?._id, product: id };
+    dispatch(addToCartAsync(data));
+    showToast("Item added to cart succcessfully!", "success");
   };
 
-  
   return (
     <>
       {isProductAlreadyinWishlist !== -1 ? (
@@ -140,66 +152,70 @@ export const ProductCard = ({
                 alignItems: "center",
               }}
             >
-              <Typography>AED  {price}</Typography>
-              {!isWishlistCard
-                ? isProductAlreadyInCart
-                  ? <motion.button
-                  style={{
-                    padding: "10px 15px",
-                    borderRadius: "3px",
-                    outline: "none",
-                    border: "none",
-                    backgroundColor: "#d1d5db",
-                    color: "#6b7280",
-                    fontSize: is408 ? ".9rem" : is488 ? ".7rem" : ".9rem",
-                    cursor: "not-allowed",
-                  }}
-                  disabled
-                >
-                  <div
+              <Typography>AED {price}</Typography>
+              {!isWishlistCard ? (
+                isProductAlreadyInCart ? (
+                  <motion.button
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      columnGap: ".5rem",
+                      padding: "10px 15px",
+                      borderRadius: "3px",
+                      outline: "none",
+                      border: "none",
+                      backgroundColor: "#d1d5db",
+                      color: "#6b7280",
+                      fontSize: is408 ? ".9rem" : is488 ? ".7rem" : ".9rem",
+                      cursor: "not-allowed",
                     }}
+                    disabled
                   >
-                    <p>Already in Cart</p>
-                  </div>
-                </motion.button>
-                  : !isAdminCard && (
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 1 }}
-                        onClick={(e) => handleAddToCart(e)}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        columnGap: ".5rem",
+                      }}
+                    >
+                      <p>Already in Cart</p>
+                    </div>
+                  </motion.button>
+                ) : (
+                  !isAdminCard && (
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 1 }}
+                      onClick={(e) => handleAddToCart(e)}
+                      style={{
+                        padding: "10px 15px",
+                        borderRadius: "3px",
+                        outline: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        backgroundColor: "black",
+                        color: "white",
+                        fontSize: is408
+                          ? ".9rem"
+                          : is488
+                          ? ".7rem"
+                          : is500
+                          ? ".8rem"
+                          : ".9rem",
+                      }}
+                    >
+                      <div
                         style={{
-                          padding: "10px 15px",
-                          borderRadius: "3px",
-                          outline: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          backgroundColor: "black",
-                          color: "white",
-                          fontSize: is408
-                            ? ".9rem"
-                            : is488
-                            ? ".7rem"
-                            : is500
-                            ? ".8rem"
-                            : ".9rem",
+                          display: "flex",
+                          alignItems: "center",
+                          columnGap: ".5rem",
                         }}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            columnGap: ".5rem",
-                          }}
-                        >
-                          <p>Add To Cart</p>
-                        </div>
-                      </motion.button>
-                    )
-                : ""}
+                        <p>Add To Cart</p>
+                      </div>
+                    </motion.button>
+                  )
+                )
+              ) : (
+                ""
+              )}
             </Stack>
             {stockQuantity <= 20 && (
               <FormHelperText sx={{ fontSize: ".9rem" }} error>

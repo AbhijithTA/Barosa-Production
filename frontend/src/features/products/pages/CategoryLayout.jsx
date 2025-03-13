@@ -88,9 +88,10 @@ const CategoryLayout = () => {
           setFetchStatus("error");
         }
       };
-
-      fetchProducts();
-    } else {
+      
+        fetchProducts();
+    }
+    else {
       setProducts([]);
       setFetchStatus("idle");
     }

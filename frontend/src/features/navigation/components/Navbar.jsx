@@ -157,7 +157,7 @@ export const Navbar = () => {
             </Link>
           </div>
         )}
-        <div className="sm:flex sm:justify-center absolute left-1/2 transform -translate-x-1/2">
+        <div className="flex justify-start sm:justify-center w-full">
           <Link to="/">
             <h2 className="text-2xl font-bold text-black">
               {loggedInUser?.isAdmin ? "Admin" : "BAROSA"}

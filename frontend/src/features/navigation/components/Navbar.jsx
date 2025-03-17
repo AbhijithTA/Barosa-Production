@@ -45,6 +45,11 @@ export const Navbar = () => {
     return () => document.removeEventListener("click", handleOutsideClick);
   }, [handleOutsideClick]);
 
+  // Close mobile menu when navigating
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [navigate]);
+
   const handleRedirect = (path) => {
     if (!loggedInUser) {
       navigate("/login");
@@ -80,7 +85,10 @@ export const Navbar = () => {
             <div className="relative dropdown-container">
               <button
                 className="flex items-center text-sm font-medium hover:text-gray-600"
-                onClick={() => setShopDropdown(!shopDropdown)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShopDropdown(!shopDropdown);
+                }}
               >
                 SHOP
                 <svg
@@ -101,7 +109,7 @@ export const Navbar = () => {
                 </svg>
               </button>
               {shopDropdown && (
-                <div className="absolute left-0 bg-white shadow-lg z-10 w-[96vw] mt-4 flex flex-wrap justify-between py-8 px-8">
+                <div className="absolute left-0 bg-white shadow-lg z-10 w-[96vw] mt-4 flex flex-wrap justify-between py-8 px-8 overflow-y-auto max-h-[80vh]">
                   {categories.map((category) => (
                     <div
                       key={category._id}
@@ -115,11 +123,12 @@ export const Navbar = () => {
                           <li
                             key={sub._id}
                             className="hover:text-black mb-1"
-                            onClick={() =>
+                            onClick={() => {
                               navigate(
                                 `/categories/${category.name}/${sub.name}`
-                              )
-                            }
+                              );
+                              setShopDropdown(false);
+                            }}
                           >
                             {sub.name}
                           </li>
@@ -148,7 +157,7 @@ export const Navbar = () => {
             </Link>
           </div>
         )}
-        <div className="flex justify-center">
+        <div className="sm:flex sm:justify-center absolute left-1/2 transform -translate-x-1/2">
           <Link to="/">
             <h2 className="text-2xl font-bold text-black">
               {loggedInUser?.isAdmin ? "Admin" : "BAROSA"}
@@ -156,7 +165,8 @@ export const Navbar = () => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-6">
+        {/* Modified div to push icons more to the right on mobile */}
+        <div className="flex items-center gap-4 sm:gap-6 ml-auto mr-2 sm:mr-0">
           {loggedInUser ? (
             <>
               {!loggedInUser.isAdmin && (
@@ -204,7 +214,7 @@ export const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Button */}
         <div className="md:hidden">
           <button
             className="p-2"
@@ -229,97 +239,188 @@ export const Navbar = () => {
               />
             </svg>
           </button>
+
+          {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="fixed top-16 left-0 w-full h-screen bg-white shadow-lg z-50 overflow-y-auto">
+            <div className="fixed top-16 left-0 w-full h-[calc(80vh-4rem)] bg-white shadow-lg z-50 overflow-y-auto">
               <div className="py-4 px-6">
-                <h1 className="font-semibold">Hey {loggedInUser?.name}</h1>
-                <Link to="/" className="block text-black mt-4 font-semibold">
+                {loggedInUser && (
+                  <h1 className="font-semibold">Hey {loggedInUser.name}</h1>
+                )}
+                <Link
+                  to="/"
+                  className="block text-black mt-4 font-semibold"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Home
                 </Link>
-                <h3
-                  className="font-semibold cursor-pointer mt-4"
-                  onClick={() => toggleCategory("shop")}
-                >
-                  Shop
-                </h3>
-                {expandedCategory === "shop" && (
-                  <ul className="ml-4 cursor-pointer">
-                    <li
-                      className="mb-2 cursor-pointer font-semibold"
-                      onClick={() => toggleSubCategory("women")}
+
+                {!loggedInUser?.isAdmin && (
+                  <>
+                    <div
+                      className="font-semibold cursor-pointer mt-4 flex justify-between items-center"
+                      onClick={() => toggleCategory("shop")}
                     >
-                      Women
-                    </li>
-                    {expandedSubCategory === "women" && (
-                      <ul className="ml-4 text-sm">
-                        <li>Top</li>
-                        <li>Mid Dress</li>
-                        <li>Long Dress</li>
-                        <li>Sets</li>
-                        <li>Pants</li>
-                        <li>Shorts</li>
-                        <li>Sleepwear</li>
-                        <li>Blazers</li>
-                      </ul>
+                      <span>Shop</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`w-4 h-4 transform transition-transform duration-200 ${
+                          expandedCategory === "shop"
+                            ? "rotate-180"
+                            : "rotate-0"
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+
+                    {expandedCategory === "shop" && (
+                      <div className="ml-4 mt-2">
+                        {categories.map((category) => (
+                          <div key={category._id} className="mb-3">
+                            <div
+                              className="mb-2 cursor-pointer font-semibold flex justify-between items-center"
+                              onClick={() => toggleSubCategory(category.name)}
+                            >
+                              <span>{category.name}</span>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className={`w-4 h-4 transform transition-transform duration-200 ${
+                                  expandedSubCategory === category.name
+                                    ? "rotate-180"
+                                    : "rotate-0"
+                                }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </div>
+
+                            {expandedSubCategory === category.name && (
+                              <ul className="ml-4 text-sm space-y-2">
+                                {category.subCategory.map((sub) => (
+                                  <li
+                                    key={sub._id}
+                                    className="hover:text-black"
+                                    onClick={() => {
+                                      navigate(
+                                        `/categories/${category.name}/${sub.name}`
+                                      );
+                                      setMobileMenuOpen(false);
+                                    }}
+                                  >
+                                    {sub.name}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     )}
-                    <li
-                      className="mb-2 cursor-pointer font-semibold"
-                      onClick={() => toggleSubCategory("men")}
-                    >
-                      Men
-                    </li>
-                    {expandedSubCategory === "men" && (
-                      <ul className="ml-4 text-sm">
-                        <li>Shirts</li>
-                        <li>Pants</li>
-                        <li>Casual Pants</li>
-                        <li>Suits</li>
-                        <li>Shorts</li>
-                        <li>Sleepwear</li>
-                        <li>Blazers</li>
-                        <li>Sets</li>
-                      </ul>
-                    )}
-                    <li
-                      className="mb-2 cursor-pointer font-semibold"
-                      onClick={() => toggleSubCategory("kids")}
-                    >
-                      Kids
-                    </li>
-                    {expandedSubCategory === "kids" && (
-                      <ul className="ml-4 text-sm">
-                        <li>Shirts</li>
-                        <li>Pants</li>
-                        <li>Shorts</li>
-                        <li>Sleepwear</li>
-                        <li>Sets</li>
-                      </ul>
-                    )}
-                    <li
-                      className="mb-2 cursor-pointer font-semibold"
-                      onClick={() => toggleSubCategory("gifts")}
-                    >
-                      Gifts
-                    </li>
-                    {expandedSubCategory === "gifts" && (
-                      <ul className="ml-4 text-sm">
-                        <li>Gifts</li>
-                      </ul>
-                    )}
-                  </ul>
+                  </>
                 )}
+
                 <Link
                   to="/about-us"
                   className="block text-black mt-4 font-semibold"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
                   About
                 </Link>
                 <Link
                   to="/contact-us"
-                  className="block text-black font-semibold"
+                  className="block text-black mt-4 font-semibold"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
                   Contact
                 </Link>
+
+                {/* Mobile menu user options */}
+                {loggedInUser && (
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    {loggedInUser.isAdmin ? (
+                      <>
+                        <Link
+                          to="/admin-dashboard"
+                          className="block py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Admin Dashboard
+                        </Link>
+                        <Link
+                          to="/admin/add-product"
+                          className="block py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Add Products
+                        </Link>
+                        <Link
+                          to="/admin/orders"
+                          className="block py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Manage Orders
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/profile"
+                          className="block py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          My Orders
+                        </Link>
+                        <Link
+                          to="/wishlist"
+                          className="block py-2 sm:hidden"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Wishlist ({wishlistItemsCount})
+                        </Link>
+                        <Link
+                          to="/cart"
+                          className="block py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Cart ({cartItemsCount})
+                        </Link>
+                      </>
+                    )}
+                    <button
+                      className="block w-full text-left py-2 text-red-500"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -339,7 +440,10 @@ const ProfileIcon = ({
   <div className="relative flex items-center gap-2 dropdown-container">
     <Profile
       className="w-5 h-5 cursor-pointer hover:text-gray-600"
-      onClick={() => setProfileDropdown(!profileDropdown)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setProfileDropdown(!profileDropdown);
+      }}
     />
     <span className="font-semibold text-sm hidden sm:block">{name}</span>
     {profileDropdown && (
@@ -348,19 +452,19 @@ const ProfileIcon = ({
           <>
             <Link
               to="/admin-dashboard"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
+              className="block px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"
             >
               Admin Dashboard
             </Link>
             <Link
               to="/admin/add-product"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
+              className="block px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"
             >
               Add Products
             </Link>
             <Link
               to="/admin/orders"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
+              className="block px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"
             >
               Manage Orders
             </Link>
@@ -369,20 +473,20 @@ const ProfileIcon = ({
           <>
             <Link
               to="/profile"
-              className="block px-8 py-2 text-sm text-left hover:bg-gray-100"
+              className="block px-8 py-2 text-sm text-left hover:bg-gray-100 whitespace-nowrap"
             >
               Profile
             </Link>
             <Link
               to="/orders"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
+              className="block px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"
             >
               My Orders
             </Link>
           </>
         )}
         <button
-          className="block w-full text-center px-4 py-2 text-sm hover:bg-gray-100"
+          className="block w-full text-center px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"
           onClick={handleLogout}
         >
           Logout
@@ -397,7 +501,7 @@ const IconWithBadge = ({ Icon, count, onClick }) => (
     <Icon onClick={onClick} className="w-6 h-6 cursor-pointer" />
     {count > 0 && (
       <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-        {count}
+        {count > 99 ? "99+" : count}
       </span>
     )}
   </div>

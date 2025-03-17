@@ -9,14 +9,14 @@ const ImageSlider = ({ images = [] }) => {
   const [index, setIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  useEffect(() => {
-    if (!isHovered && images.length > 0) {
-      const interval = setInterval(() => {
-        setIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [images.length, isHovered]);
+  // useEffect(() => {
+  //   if (!isHovered && images.length > 0) {
+  //     const interval = setInterval(() => {
+  //       setIndex((prevIndex) => (prevIndex + 1) % images.length);
+  //     }, 3000);
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [images.length, isHovered]);
 
   const nextImage = () => setIndex((prevIndex) => (prevIndex + 1) % images.length);
   const prevImage = () => setIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);

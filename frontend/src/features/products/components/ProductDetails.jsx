@@ -16,7 +16,6 @@ import {
   Stack,
   Typography,
   useMediaQuery,
-  Button,
 } from "@mui/material";
 import {
   addToCartAsync,

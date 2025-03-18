@@ -1,11 +1,11 @@
 const Cart = require("../models/Cart");
 const Counter = require("../models/Counter");
 const Order = require("../models/Order");
+const { sendMail } = require("../utils/Emails");
 
 exports.create = async (req, res) => {
   try {
     const { user, items, address, paymentMode, total } = req.body;
-    console.log(req.body, "This is the req body when order is created");
 
     //Validating required fields
     if (!user || !items || !address || !paymentMode || !total) {
@@ -38,6 +38,20 @@ exports.create = async (req, res) => {
 
     //clearing the user cart
     await Cart.deleteMany({ user });
+
+    //Send Email Notification to the owner
+    const ownerEmail = process.env.OWNER_EMAIL;
+    const subject = "New Order Received - Barosa Shopping";
+
+    const emailBody = `
+    <h2>New Order Received</h2>
+    <p>A new order has been placed. Please check the system for details.</p>
+    <p><strong>Order Total:</strong> AED${total}</p>
+    <p><strong>Payment Mode:</strong> ${paymentMode}</p>
+    <p>Kindly process the order as soon as possible.</p>
+`;
+
+    await sendMail(ownerEmail, subject, emailBody);
 
     res.status(201).json(created);
   } catch (error) {

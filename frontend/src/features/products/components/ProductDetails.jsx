@@ -90,7 +90,7 @@ export const ProductDetails = () => {
   const wishlistItems = useSelector(selectWishlistItems);
 
   const isProductAlreadyInCart = cartItems.some(
-    (item) => item.product._id === id
+    (item) => item.product._id === id && item.size === selectedSize
   );
   const isProductAlreadyinWishlist = wishlistItems.some(
     (item) => item.product._id === id
@@ -177,6 +177,19 @@ export const ProductDetails = () => {
       navigate("/login");
       return;
     }
+
+    if (!selectedSize) {
+      toast.error("Please select a size before adding to cart");
+      return;
+    }
+
+    const availableStock = product?.stockQuantity[selectedSize] || 0;
+
+    if (availableStock === 0) {
+      toast.error("Selected size is out of stock");
+      return;
+    }
+
     const item = {
       user: loggedInUser._id,
       product: id,
@@ -188,19 +201,30 @@ export const ProductDetails = () => {
   };
 
   const handleDecreaseQty = () => {
-    if (quantity !== 1) {
+    if (quantity > 1) {
       setQuantity(quantity - 1);
     }
   };
 
   const handleIncreaseQty = () => {
-    if (quantity < 20 && quantity < product.stockQuantity) {
+    if (!selectedSize) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    //ensuring the user does not exceed the stock quantiity of hte selected size
+    const availableStock = product?.stockQuantity[selectedSize] || 0;
+
+    if (quantity < 20 && quantity < availableStock) {
       setQuantity(quantity + 1);
+    } else {
+      toast.warn("Maximum quantity reached for this size");
     }
   };
 
   const handleSizeSelect = (size) => {
     setSelectedSize(size);
+    setQuantity(1); // Reset quanitiy when a new size is
   };
 
   const handleAddRemoveFromWishlist = (e) => {
@@ -305,79 +329,18 @@ export const ProductDetails = () => {
                   <Stack mt={is480 ? "0rem" : "5rem"}>
                     {is1420 ? (
                       <Stack width={is480 ? "100%" : is990 ? "400px" : "500px"}>
-                        {/* <AutoPlaySwipeableViews
-                          width={"100%"}
-                          height={"100%"}
-                          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-                          index={activeStep}
-                          onChangeIndex={handleStepChange}
-                          enableMouseEvents
-                        >
-                          {product?.images.map((image, index) => (
-                            <div
-                              key={index}
-                              style={{ width: "100%", height: "100%" }}
-                            >
-                              {Math.abs(activeStep - index) <= 2 ? (
-                                <Box
-                                  component="img"
-                                  sx={{
-                                    width: "100%",
-                                    objectFit: "contain",
-                                    overflow: "hidden",
-                                    aspectRatio: 1 / 1,
-                                  }}
-                                  src={image}
-                                  alt={product?.title}
-                                />
-                              ) : null}
-                            </div>
-                          ))}
-                        </AutoPlaySwipeableViews> */}
-
                         <ImageSlider images={product?.images || []} />
-
-                        {/* <MobileStepper
-                          steps={maxSteps}
-                          position="static"
-                          activeStep={activeStep}
-                          nextButton={
-                            <Button
-                              size="small"
-                              onClick={handleNext}
-                              disabled={activeStep === maxSteps - 1}
-                            >
-                              Next
-                              {theme.direction === "rtl" ? (
-                                <KeyboardArrowLeft />
-                              ) : (
-                                <KeyboardArrowRight />
-                              )}
-                            </Button>
-                          }
-                          backButton={
-                            <Button
-                              size="small"
-                              onClick={handleBack}
-                              disabled={activeStep === 0}
-                            >
-                              {theme.direction === "rtl" ? (
-                                <KeyboardArrowRight />
-                              ) : (
-                                <KeyboardArrowLeft />
-                              )}
-                              Back
-                            </Button>
-                          }
-                        /> */}
                       </Stack>
                     ) : (
-                      <div style={{ width: "100%" }}>
+                      <div style={{ width: "70%" }}>
                         <img
                           style={{
                             width: "100%",
                             objectFit: "contain",
-                            aspectRatio: 1 / 1,
+                            aspectRatio: 1 / 0.8,
+                            maxHeight: "650px",
+                            margin:"0 auto",
+                            display: "block",
                           }}
                           src={product?.images[selectedImageIndex]}
                           alt={`${product?.title} image`}
@@ -447,52 +410,6 @@ export const ProductDetails = () => {
 
                   {!loggedInUser?.isAdmin && (
                     <Stack sx={{ rowGap: "1.3rem" }} width={"fit-content"}>
-                      {/* colors */}
-                      {/* <Stack
-                        flexDirection={"row"}
-                        alignItems={"center"}
-                        columnGap={is387 ? "5px" : "1rem"}
-                        width={"fit-content"}
-                      >
-                        <Typography>Colors: </Typography>
-                        <Stack
-                          flexDirection={"row"}
-                          columnGap={is387 ? ".5rem" : ".2rem"}
-                        >
-                          {COLORS.map((color, index) => (
-                            <div
-                              style={{
-                                backgroundColor: "white",
-                                border:
-                                  selectedColorIndex === index
-                                    ? `1px solid ${theme.palette.primary.dark}`
-                                    : "",
-                                width: is340 ? "40px" : "50px",
-                                height: is340 ? "40px" : "50px",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                borderRadius: "100%",
-                              }}
-                            >
-                              <div
-                                onClick={() => setSelectedColorIndex(index)}
-                                style={{
-                                  width: "40px",
-                                  height: "40px",
-                                  border:
-                                    color === "#F6F6F6"
-                                      ? "1px solid grayText"
-                                      : "",
-                                  backgroundColor: color,
-                                  borderRadius: "100%",
-                                }}
-                              ></div>
-                            </div>
-                          ))}
-                        </Stack>
-                      </Stack> */}
-
                       {/* size */}
                       <Stack
                         flexDirection={"row"}
@@ -647,8 +564,8 @@ export const ProductDetails = () => {
                               borderRadius: "8px",
                             }}
                             disabled={
-                              selectedSize &&
-                              (!product?.stockQuantity[selectedSize] ||
+                              !selectedSize ||
+                              (selectedSize &&
                                 product?.stockQuantity[selectedSize] <= 0)
                             }
                           >

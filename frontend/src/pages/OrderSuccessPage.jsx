@@ -9,34 +9,32 @@ import Lottie from "lottie-react";
 import { orderSuccessAnimation } from "../assets";
 
 export const OrderSuccessPage = () => {
-  const { id } = useParams(); // `id` can be sessionId (CARD) or orderId (COD)
+  const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const userDetails = useSelector(selectUserInfo);
-  const currentOrder = useSelector(selectCurrentOrder); 
+  const currentOrder = useSelector(selectCurrentOrder);
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
+        setLoading(true);
         let response;
-        
-        if (id && id.startsWith("cs_")) {
-          // ✅ Fetch order for CARD payments using sessionId
+
+        if (id?.startsWith("cs_")) {
           response = await axiosi.get(`/checkout/get-order?session_id=${id}`);
         } else if (id) {
-          // ✅ Fetch order for COD using orderId
           response = await axiosi.get(`/orders/${id}`);
         } else if (userDetails?._id) {
-          // ✅ Fetch the latest order for the user
           response = await axiosi.get(`/orders/user/${userDetails._id}`);
           if (response.data.length > 0) {
-            response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort orders by latest
-            response = { data: { order: response.data[0] } }; // Pick the most recent order
+            response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            response = { data: { order: response.data[0] } };
           } else {
             throw new Error("No orders found.");
           }
@@ -77,6 +75,11 @@ export const OrderSuccessPage = () => {
     );
   }
 
+  const orderNumber = order?.orderNo ? `#${order.orderNo}` : "N/A";
+
+  console.log(order,"this is the order details");
+  console.log(orderNumber,"this is the order number");
+
   return (
     <Stack width="100vw" height="100vh" justifyContent="center" alignItems="center">
       <Stack component={Paper} rowGap={3} elevation={1} p={4} justifyContent="center" alignItems="center">
@@ -86,7 +89,7 @@ export const OrderSuccessPage = () => {
 
         <Stack textAlign="center" justifyContent="center" alignItems="center" rowGap={1}>
           <Typography variant="h6">Hey {userDetails?.name}</Typography>
-          <Typography variant="h5">Your Order #{order?._id ||currentOrder?._id || order?.orderNo} is confirmed</Typography>
+          <Typography variant="h5">Your Order #<strong>{orderNumber}</strong> is confirmed</Typography>
           <Typography variant="body2" color="text.secondary">
             Thank you for shopping with us ❤️
           </Typography>

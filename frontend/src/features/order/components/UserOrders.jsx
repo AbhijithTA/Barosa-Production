@@ -237,7 +237,7 @@ export const UserOrders = () => {
                             {cartItems.some(
                               (cartItem) =>
                                 cartItem.product._id === product.product._id
-                            ) ? (
+                            ) && (
                               <Button
                                 size="small"
                                 variant="contained"
@@ -246,14 +246,7 @@ export const UserOrders = () => {
                               >
                                 Already in Cart
                               </Button>
-                            ) : (
-                              <Button
-                                size="small"
-                                variant="contained"
-                                onClick={() => handleAddToCart(product.product)}
-                              >
-                                Buy Again
-                              </Button>
+                           
                             )}
                           </Stack>
                         </Stack>

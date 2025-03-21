@@ -6,8 +6,10 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Lottie from "lottie-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -27,6 +29,7 @@ import {
 } from "../AuthSlice";
 import { toast } from "react-toastify";
 import { MotionConfig, motion } from "framer-motion";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export const Login = () => {
   const dispatch = useDispatch();
@@ -82,6 +85,12 @@ export const Login = () => {
     const cred = { ...data };
     delete cred.confirmPassword;
     dispatch(loginAsync(cred));
+  };
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   return (
@@ -151,10 +160,19 @@ export const Login = () => {
 
           <motion.div whileHover={{ y: -5 }}>
             <TextField
-              type="password"
+              type={showPassword ? "text" : "password"}
               fullWidth
               {...register("password", { required: "Password is required" })}
               placeholder="Password"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleTogglePassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             {errors.password && (
               <FormHelperText sx={{ mt: 1 }} error>

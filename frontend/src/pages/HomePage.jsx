@@ -20,6 +20,7 @@ export const HomePage = () => {
       dispatch(resetAddressStatus());
     }
   }, [addressStatus]);
+  console.log(addressStatus);
 
   return (
     <>

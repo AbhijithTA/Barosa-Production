@@ -57,6 +57,7 @@ exports.createCategory = async (req, res) => {
 exports.createSubCategory = async (req, res) => {
   try {
     const { name, category } = req.body;
+    
 
     //validating the req body
     if (!name || typeof name !== "string" || name.trim() === "") {

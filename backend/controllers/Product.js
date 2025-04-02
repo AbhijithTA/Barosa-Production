@@ -118,9 +118,9 @@ exports.getAll = async (req, res) => {
     const results = await Product.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(limit);
+      .limit(limit || 10);
 
-    res.set("X-Total-Count", totalDocs);
+    res.set("X-Total-Count", totalDocs.toString());
     res.status(200).json(results);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -226,7 +226,6 @@ exports.getFeaturedProducts = async (req, res) => {
 
 exports.getLatestProducts = async (req, res) => {
   const categoryName = req.params.category;
-  
 
   try {
     const category = await Category.findOne({ name: categoryName });

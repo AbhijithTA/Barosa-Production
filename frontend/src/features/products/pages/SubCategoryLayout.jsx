@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useProducts } from "../../../hooks/useProducts";
-import { Grid, Stack, useMediaQuery } from "@mui/material";
+import { Grid, Pagination, Stack, useMediaQuery, Box } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import { ProductCard } from "../components/ProductCard";
 import Lottie from "lottie-react";
@@ -14,19 +14,24 @@ import {
   deleteWishlistItemByIdAsync,
 } from "../../wishlist/WishlistSlice";
 
-const SubcategoryLayout = () => {
+const SubcategoryLayout = ({ isFilterOpen = false }) => {
   const { categoryTitle, subcategoryTitle } = useParams();
   const outletContext = useOutletContext();
   const { categories = [], subCategories = [] } = outletContext || {};
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const wishlistItems = useSelector(selectWishlistItems);
   const loggedInUser = useSelector(selectLoggedInUser);
-  
+  const [page, setPage] = useState(1);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
 
   // Finding the current category and subcategory ids
   const currentCategory = categories.find(
@@ -34,14 +39,15 @@ const SubcategoryLayout = () => {
   );
 
   const currentSubCategory = subCategories.find(
-    (subCategory) => subCategory.name.toLowerCase() === subcategoryTitle?.toLowerCase()
+    (subCategory) =>
+      subCategory.name.toLowerCase() === subcategoryTitle?.toLowerCase()
   );
 
-  const { products, fetchStatus } = useProducts({
+  const { products, fetchStatus, totalPages } = useProducts({
     category: currentCategory?._id,
     subCategory: currentSubCategory?._id,
     sort: null,
-    page: 1,
+    page: page,
     limit: 12,
   });
 
@@ -66,7 +72,10 @@ const SubcategoryLayout = () => {
   if (fetchStatus === "loading" || fetchStatus === "pending") {
     return (
       <Stack alignItems="center" justifyContent="center" height="50vh">
-        <Lottie animationData={loadingAnimation} style={{ width: isMobile ? 150 : 200 }} />
+        <Lottie
+          animationData={loadingAnimation}
+          style={{ width: isMobile ? 150 : 200 }}
+        />
       </Stack>
     );
   }
@@ -91,34 +100,69 @@ const SubcategoryLayout = () => {
     );
   }
 
+  
+  const getGridSizes = () => {
+    if (isMobile) {
+      return { xs: 12 }; 
+    }
+    if (isTablet) {
+      return { xs: 12, sm: isFilterOpen ? 12 : 6 }; 
+    }
+   
+    return { 
+      xs: 12, 
+      sm: 6, 
+      md: isFilterOpen ? 6 : 4, 
+      lg: isFilterOpen ? 4 : 3 
+    };
+  };
+
+  const gridSizes = getGridSizes();
+
   return (
-    <Grid 
-      container 
-      spacing={isMobile ? 1 : 2} 
-      justifyContent="center" 
-      sx={{ padding: isMobile ? "8px" : "16px" }}
-    >
-      {products.map((product) => (
-        <Grid 
-          item 
-          xs={12} 
-          sm={6} 
-          md={4} 
-          lg={3} 
-          key={product._id}
-          sx={{ padding: isMobile ? "4px" : undefined }}
-        >
-          <ProductCard
-            id={product._id}
-            title={product.title}
-            thumbnail={product.thumbnail}
-            price={product.price}
-            handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}
-            onClick={() => navigate(`/product-details/${product._id}`)}
-          />
-        </Grid>
-      ))}
-    </Grid>
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+      <Grid
+        container
+        spacing={isMobile ? 1 : 2}
+        justifyContent={isMobile ? "center" : "flex-start"}
+        sx={{ 
+          padding: isMobile ? "8px" : "16px",
+          margin: 0, // Reset margin to prevent overflow
+          width: '100%' // Ensure grid takes full width
+        }}
+      >
+        {products.map((product) => (
+          <Grid
+            item
+            {...gridSizes}
+            key={product._id}
+            sx={{ 
+              padding: isMobile ? "4px" : undefined,
+              display: 'flex',
+              justifyContent: 'center'
+            }}
+          >
+            <ProductCard
+              id={product._id}
+              title={product.title}
+              thumbnail={product.thumbnail}
+              price={product.price}
+              handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}
+              onClick={() => navigate(`/product-details/${product._id}`)}
+            />
+          </Grid>
+        ))}
+      </Grid>
+
+      <Stack spacing={2} alignItems={"center"} sx={{ marginTop: 3, marginBottom: 3 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </Stack>
+    </Box>
   );
 };
 

@@ -150,7 +150,7 @@ export const Checkout = () => {
     const order = {
       user: loggedInUser._id,
       items: cartItems.map((item) => ({
-        product: item.product._id, // Ensure this is the product ID
+        product: item.product._id, 
         quantity: item.quantity,
         size: item.size,
       })),

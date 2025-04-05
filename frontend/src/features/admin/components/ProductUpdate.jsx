@@ -55,8 +55,6 @@ export const ProductUpdate = () => {
 
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState("");
 
-  console.log(subCategories, "subCateogries  ");
-
   useEffect(() => {
     if (id) {
       dispatch(fetchProductByIdAsync(id));
@@ -64,7 +62,7 @@ export const ProductUpdate = () => {
   }, [id, dispatch]);
 
   useEffect(() => {
-    if (selectedProduct) {
+    if (selectedProduct && categories.length > 0) {
       reset(selectedProduct);
       setSelectedCategoryId(selectedProduct.category?._id || "");
       setSelectedSubcategoryId(

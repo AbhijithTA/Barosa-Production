@@ -28,8 +28,8 @@ exports.createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "http://localhost:3000/order-success/{CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:3000/cart",
+      success_url: "https://barosatrendz.ae/order-success/{CHECKOUT_SESSION_ID}",
+      cancel_url: "https://barosatrendz.ae/cart",
       metadata: {
         order_id: order._id,
       },

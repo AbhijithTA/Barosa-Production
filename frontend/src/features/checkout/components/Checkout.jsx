@@ -76,13 +76,7 @@ export const Checkout = () => {
         navigate(`/order-success/${currentOrder?._id}`);
       }
     }
-  }, [
-    currentOrder,
-    dispatch,
-    navigate,
-    selectedPaymentMethod,
-    loggedInUser._id,
-  ]);
+  }, [currentOrder, dispatch, navigate, selectedPaymentMethod, loggedInUser?._id]);
 
   const handleAddAddress = async (data) => {
     const address = { ...data, user: loggedInUser._id };

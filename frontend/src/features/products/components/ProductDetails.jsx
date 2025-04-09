@@ -90,10 +90,10 @@ export const ProductDetails = () => {
   const wishlistItems = useSelector(selectWishlistItems);
 
   const isProductAlreadyInCart = cartItems.some(
-    (item) => item.product._id === id && item.size === selectedSize
+    (item) => item?.product?._id === id && item.size === selectedSize
   );
   const isProductAlreadyinWishlist = wishlistItems.some(
-    (item) => item.product._id === id
+    (item) => item?.product?._id === id
   );
 
   const productFetchStatus = useSelector(selectProductFetchStatus);
@@ -232,7 +232,7 @@ export const ProductDetails = () => {
       const data = { user: loggedInUser?._id, product: id };
       dispatch(createWishlistItemAsync(data));
     } else if (!e.target.checked) {
-      const index = wishlistItems.findIndex((item) => item.product._id === id);
+      const index = wishlistItems.findIndex((item) => item?.product?._id === id);
       dispatch(deleteWishlistItemByIdAsync(wishlistItems[index]._id));
     }
   };

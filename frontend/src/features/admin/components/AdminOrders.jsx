@@ -98,7 +98,8 @@ export const AdminOrders = () => {
     }
   };
 
- 
+  console.log(orders, "orders details");
+
   return (
     <Stack justifyContent={"center"} alignItems={"center"}>
       <Stack
@@ -159,6 +160,9 @@ export const AdminOrders = () => {
                           >
                             <Avatar src={product?.product?.thumbnail}></Avatar>
                             <Typography>{product?.product?.title}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Size: {product?.size}
+                            </Typography>
                           </Stack>
                         ))}
                       </TableCell>

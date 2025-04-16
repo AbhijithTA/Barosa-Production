@@ -59,9 +59,19 @@ export const Navbar = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logoutAsync());
-    navigate("/login");
+    dispatch(logoutAsync())
+      .unwrap()
+      .then(() => {
+        // Force redirect to home page after logout
+        window.location.href = "/"; // This does a full page reload
+      })
+      .catch((error) => {
+        console.error("Logout failed:", error);
+        // Fallback to normal navigation if needed
+        navigate("/");
+      });
   };
+
 
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [expandedSubCategory, setExpandedSubCategory] = useState(null);

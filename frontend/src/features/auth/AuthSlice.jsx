@@ -84,10 +84,13 @@ export const checkAuthAsync = createAsyncThunk(
   }
 );
 
-export const logoutAsync = createAsyncThunk("auth/logoutAsync", async () => {
-  const res = await logout();
-  return res;
-});
+export const logoutAsync = createAsyncThunk(
+  "auth/logoutAsync", 
+  async () => {
+    const res = await logout(); // Your API call
+    return res;
+  }
+);
 
 const authSlice = createSlice({
   name: "authSlice",

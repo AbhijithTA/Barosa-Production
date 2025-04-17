@@ -28,12 +28,13 @@ exports.createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "https://barosatrendz.ae/order-success/{CHECKOUT_SESSION_ID}",
+      success_url: "https://barosatrendz.ae/order-success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://barosatrendz.ae/cart",
       metadata: {
         order_id: order._id,
       },
     });
+    
 
     // return the session ID to the front end
     res.status(200).json({ id: session.id });

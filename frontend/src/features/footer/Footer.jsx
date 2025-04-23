@@ -145,7 +145,7 @@ export const Footer = () => {
             <Typography sx={{ ...labelStyles, lineHeight: "1.6" }}>
               Barosa Trendz Fashion,
               <br />
-              Al Zahiryah E1602,
+              Al Zahiyah E1602,
               <br />
               Navigate area,
               <br />
@@ -179,7 +179,7 @@ export const Footer = () => {
             <Typography sx={labelStyles}>Wishlist</Typography>
           </Link>
         </Stack>
-
+{/* 
         <Stack rowGap={"1rem"} padding={"1rem"}>
           <Typography variant="h6">Quick Links</Typography>
           <Typography sx={labelStyles}>Privacy Policy</Typography>
@@ -188,7 +188,7 @@ export const Footer = () => {
           <Link to="/contact-us" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>Contact</Typography>
           </Link>
-        </Stack>
+        </Stack> */}
 
         <Stack rowGap={"1rem"} padding={"1rem"}>
           <Typography variant="h6">Follow Us On</Typography>

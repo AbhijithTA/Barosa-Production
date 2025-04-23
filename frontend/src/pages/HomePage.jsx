@@ -33,7 +33,7 @@ export const HomePage = () => {
         <div className="pt-[50px]">
           <ProductFeatured />
         </div>
-        <ShopByCategory />
+        {/* <ShopByCategory /> */}
         <Footer />
       </div>
     </>

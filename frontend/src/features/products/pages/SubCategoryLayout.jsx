@@ -13,6 +13,8 @@ import {
   createWishlistItemAsync,
   deleteWishlistItemByIdAsync,
 } from "../../wishlist/WishlistSlice";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+
 
 const SubcategoryLayout = ({ isFilterOpen = false }) => {
   const { categoryTitle, subcategoryTitle } = useParams();
@@ -83,8 +85,8 @@ const SubcategoryLayout = ({ isFilterOpen = false }) => {
   if (fetchStatus === "error") {
     return (
       <Stack alignItems="center" justifyContent="center" height="50vh">
-        <p className="text-center text-red-500 p-4">
-          Failed to load products. Please try again later.
+        <p className="text-center text-gray-500 p-4 text-lg">
+          Products are coming soon. Stay tuned!
         </p>
       </Stack>
     );
@@ -92,43 +94,50 @@ const SubcategoryLayout = ({ isFilterOpen = false }) => {
 
   if (fetchStatus === "fulfilled" && (!products || products.length === 0)) {
     return (
-      <Stack alignItems="center" justifyContent="center" height="50vh">
-        <p className="text-center text-gray-500 p-4">
-          No products found for this subcategory.
+      <Stack alignItems="center" justifyContent="center" height="50vh" spacing={2}>
+        <div style={{ width: 200, height: 200 }}>
+          <DotLottieReact
+            src="https://lottie.host/269f41d8-b5c8-455c-9792-a7f0a828f1e7/m5DumKEtjE.lottie"
+            loop
+            autoplay
+            
+          />
+        </div>
+        <p className="text-center text-gray-500 text-lg">
+          Products are coming soon. Stay tuned!
         </p>
       </Stack>
     );
   }
-
   
   const getGridSizes = () => {
     if (isMobile) {
-      return { xs: 12 }; 
+      return { xs: 12 };
     }
     if (isTablet) {
-      return { xs: 12, sm: isFilterOpen ? 12 : 6 }; 
+      return { xs: 12, sm: isFilterOpen ? 12 : 6 };
     }
-   
-    return { 
-      xs: 12, 
-      sm: 6, 
-      md: isFilterOpen ? 6 : 4, 
-      lg: isFilterOpen ? 4 : 3 
+
+    return {
+      xs: 12,
+      sm: 6,
+      md: isFilterOpen ? 6 : 4,
+      lg: isFilterOpen ? 4 : 3,
     };
   };
 
   const gridSizes = getGridSizes();
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
       <Grid
         container
         spacing={isMobile ? 1 : 2}
         justifyContent={isMobile ? "center" : "flex-start"}
-        sx={{ 
+        sx={{
           padding: isMobile ? "8px" : "16px",
           margin: 0, // Reset margin to prevent overflow
-          width: '100%' // Ensure grid takes full width
+          width: "100%", // Ensure grid takes full width
         }}
       >
         {products.map((product) => (
@@ -136,10 +145,10 @@ const SubcategoryLayout = ({ isFilterOpen = false }) => {
             item
             {...gridSizes}
             key={product._id}
-            sx={{ 
+            sx={{
               padding: isMobile ? "4px" : undefined,
-              display: 'flex',
-              justifyContent: 'center'
+              display: "flex",
+              justifyContent: "center",
             }}
           >
             <ProductCard
@@ -154,7 +163,11 @@ const SubcategoryLayout = ({ isFilterOpen = false }) => {
         ))}
       </Grid>
 
-      <Stack spacing={2} alignItems={"center"} sx={{ marginTop: 3, marginBottom: 3 }}>
+      <Stack
+        spacing={2}
+        alignItems={"center"}
+        sx={{ marginTop: 3, marginBottom: 3 }}
+      >
         <Pagination
           count={totalPages}
           page={page}

@@ -13,7 +13,7 @@ export const fetchProducts = async (filters) => {
   let queryString = "";
 
   if (filters.isFeatured) {
-   queryString += `isFeatured=${filters.isFeatured}&`;
+    queryString += `isFeatured=${filters.isFeatured}&`;
   }
 
   if (filters.category) {
@@ -84,3 +84,22 @@ export const toggleProductFeatured = async (id, isFeatured) => {
     throw error.response.data;
   }
 };
+
+export const fetchProductSuggestions = async (query) => {
+  try {
+    const res = await axiosi.get(`/products/suggestions/${query}`);
+    return res.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const fetchSearchResults = async (query) => {
+  try {
+    const res = await axiosi.get(`/products/search?q=${query}`);
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+

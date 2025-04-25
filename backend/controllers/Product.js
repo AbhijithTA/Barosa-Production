@@ -267,3 +267,42 @@ exports.featuredProduct = async (req, res) => {
       .json({ message: "Error Fetching Product, Please try again later" });
   }
 };
+
+exports.getProductSuggestions = async (req, res) => {
+  try {
+    const { query } = req.params;
+   
+    if (!query || query.trim().length < 2) {
+      return res.json([]);
+    }
+    const suggestions = await Product.find({
+      title: { $regex: query, $options: "i" },
+    })
+      .limit(5)
+      .select("title description");
+
+    res.json(suggestions);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error Fetching Suggestions, Please try again Later" });
+  }
+};
+
+
+exports.searchProducts = async (req, res) =>{
+  try {
+    const query = req.query.q;
+    console.log(query, "query");
+    if(!query) return res.status(400).json({ message: "Query is required" });
+
+    const products = await Product.find({
+      title: { $regex: query, $options: "i" },
+      isDeleted: false,
+    });
+
+    res.json(products);
+  }catch(error){
+    res.status(500).json({message:"Server error", error});
+  }
+}

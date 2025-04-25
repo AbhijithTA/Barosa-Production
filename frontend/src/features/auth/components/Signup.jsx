@@ -114,7 +114,7 @@ export const Signup = () => {
               sx={{ wordBreak: "break-word" }}
               fontWeight={600}
             >
-              Baroza
+              Barosa
             </Typography>
             <Typography
               alignSelf={"flex-end"}

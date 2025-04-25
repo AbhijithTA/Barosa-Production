@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectCartItems } from "../../cart/CartSlice";
 import { selectWishlistItems } from "../../wishlist/WishlistSlice";
 import { axiosi } from "../../../config/axios";
+import { SearchBar } from "../../search/SearchBar";
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -71,7 +72,6 @@ export const Navbar = () => {
         navigate("/");
       });
   };
-
 
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [expandedSubCategory, setExpandedSubCategory] = useState(null);
@@ -173,6 +173,9 @@ export const Navbar = () => {
               {loggedInUser?.isAdmin ? "Admin" : "BAROSA"}
             </h2>
           </Link>
+          <div className="hidden md:block mx-4 w-full max-w-xl">
+            <SearchBar />
+          </div>
         </div>
 
         {/* Modified div to push icons more to the right on mobile */}

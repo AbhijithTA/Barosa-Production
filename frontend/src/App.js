@@ -43,6 +43,7 @@ import CategroryLayout from "./features/products/pages/CategoryLayout";
 import SubcategoryLayout from "./features/products/pages/SubCategoryLayout";
 import { AboutUsPage } from "./pages/AboutUsPage";
 import { ContactUsPage } from "./pages/ContactUsPage";
+import { SearchResultsPage } from "./pages/SearchResultsPage";
 
 function App() {
   const isAuthChecked = useSelector(selectIsAuthChecked);
@@ -67,6 +68,7 @@ function App() {
         <Route path="/categories/:categoryTitle" element={<CategroryLayout />}>
           <Route path=":subcategoryTitle" element={<SubcategoryLayout />} />
         </Route>
+        {/* <Route path="/search" element={<SearchResultsPage />} /> */}
 
         {loggedInUser?.isAdmin ? (
           // admin routes

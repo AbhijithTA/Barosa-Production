@@ -13,6 +13,7 @@ export const Navbar = () => {
   const [shopDropdown, setShopDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
   const [profileDropdown, setProfileDropdown] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const loggedInUser = useSelector(selectLoggedInUser);
   const cartItems = useSelector(selectCartItems);
   const wishlistItems = useSelector(selectWishlistItems);
@@ -35,9 +36,10 @@ export const Navbar = () => {
   }, []);
 
   const handleOutsideClick = useCallback((e) => {
-    if (!e.target.closest(".dropdown-container")) {
+    if (!e.target.closest(".dropdown-container") && !e.target.closest(".search-container")) {
       setShopDropdown(false);
       setProfileDropdown(false);
+      // Don't close search on outside click, let the SearchBar component handle focus
     }
   }, []);
 
@@ -49,6 +51,7 @@ export const Navbar = () => {
   // Close mobile menu when navigating
   useEffect(() => {
     setMobileMenuOpen(false);
+    setSearchExpanded(false);
   }, [navigate]);
 
   const handleRedirect = (path) => {
@@ -88,24 +91,98 @@ export const Navbar = () => {
 
   return (
     <div className="fixed top-0 w-full h-16 bg-white text-black shadow-md z-50">
-      <div className="container mx-auto flex items-center justify-between px-4 md:px-8 h-full">
-        {/* Desktop Links */}
-        {!loggedInUser?.isAdmin && (
-          <div className="hidden md:flex gap-8 items-center">
-            <div className="relative dropdown-container">
+      <div className="container mx-auto px-4 md:px-8 h-full relative">
+        {/* Three-column layout */}
+        <div className="grid grid-cols-3 h-full">
+          {/* Left Column - Desktop Links */}
+          <div className="flex items-center">
+            {!loggedInUser?.isAdmin && (
+              <div className="hidden md:flex gap-8 items-center">
+                <div className="relative dropdown-container">
+                  <button
+                    className="flex items-center text-sm font-medium hover:text-gray-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShopDropdown(!shopDropdown);
+                    }}
+                  >
+                    SHOP
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${
+                        shopDropdown ? "rotate-180" : "rotate-0"
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {shopDropdown && (
+                    <div className="absolute left-0 bg-white shadow-lg z-10 w-[96vw] mt-4 flex flex-wrap justify-between py-8 px-8 overflow-y-auto max-h-[80vh]">
+                      {categories.map((category) => (
+                        <div
+                          key={category._id}
+                          className="w-1/4 flex flex-col items-start"
+                        >
+                          <h1 className="font-semibold text-lg text-black mb-2">
+                            {category.name}
+                          </h1>
+                          <ul className="text-sm text-gray-700 cursor-pointer">
+                            {category.subCategory.map((sub) => (
+                              <li
+                                key={sub._id}
+                                className="hover:text-black mb-1"
+                                onClick={() => {
+                                  navigate(
+                                    `/categories/${category.name}/${sub.name}`
+                                  );
+                                  setShopDropdown(false);
+                                }}
+                              >
+                                {sub.name}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  to="/about-us"
+                  className="text-sm font-medium hover:text-gray-600"
+                >
+                  ABOUT
+                </Link>
+                <Link
+                  to="/contact-us"
+                  className="text-sm font-medium hover:text-gray-600"
+                >
+                  CONTACT
+                </Link>
+                <Link to="/" className="text-sm font-medium hover:text-gray-600">
+                  MORE
+                </Link>
+              </div>
+            )}
+            
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
               <button
-                className="flex items-center text-sm font-medium hover:text-gray-600"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShopDropdown(!shopDropdown);
-                }}
+                className="p-2"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                SHOP
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${
-                    shopDropdown ? "rotate-180" : "rotate-0"
-                  }`}
+                  className="w-6 h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -114,335 +191,297 @@ export const Navbar = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
+                    d={
+                      mobileMenuOpen
+                        ? "M6 18L18 6M6 6l12 12"
+                        : "M4 6h16M4 12h16m-7 6h7"
+                    }
                   />
                 </svg>
               </button>
-              {shopDropdown && (
-                <div className="absolute left-0 bg-white shadow-lg z-10 w-[96vw] mt-4 flex flex-wrap justify-between py-8 px-8 overflow-y-auto max-h-[80vh]">
-                  {categories.map((category) => (
-                    <div
-                      key={category._id}
-                      className="w-1/4 flex flex-col items-start"
-                    >
-                      <h1 className="font-semibold text-lg text-black mb-2">
-                        {category.name}
-                      </h1>
-                      <ul className="text-sm text-gray-700 cursor-pointer">
-                        {category.subCategory.map((sub) => (
-                          <li
-                            key={sub._id}
-                            className="hover:text-black mb-1"
-                            onClick={() => {
-                              navigate(
-                                `/categories/${category.name}/${sub.name}`
-                              );
-                              setShopDropdown(false);
-                            }}
-                          >
-                            {sub.name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+            </div>
+          </div>
+          
+          {/* Center Column - Logo */}
+          <div className={`flex items-center justify-center transition-all duration-300 ${searchExpanded ? 'transform -translate-x-10' : ''}`}>
+            <Link to="/">
+              <h2 className="text-2xl font-bold text-black">
+                {loggedInUser?.isAdmin ? "Admin" : "BAROSA"}
+              </h2>
+            </Link>
+          </div>
+          
+          {/* Right Column - Search and User Icons */}
+          <div className="flex items-center justify-end gap-4 sm:gap-6">
+            {/* Expandable Search Bar */}
+            <div className="relative search-container">
+              {searchExpanded ? (
+                <div className={`absolute right-0 w-64 md:w-80 transition-all duration-300 z-10 -top-3`}>
+                  <SearchBar className="w-full" />
+                  <button 
+                    type="button" 
+                    className="absolute right-12 top-1 text-gray-500"
+                    onClick={() => setSearchExpanded(false)}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
+              ) : (
+                <button 
+                  onClick={() => setSearchExpanded(true)}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
               )}
             </div>
 
-            <Link
-              to="/about-us"
-              className="text-sm font-medium hover:text-gray-600"
-            >
-              ABOUT
-            </Link>
-            <Link
-              to="/contact-us"
-              className="text-sm font-medium hover:text-gray-600"
-            >
-              CONTACT
-            </Link>
-            <Link to="/" className="text-sm font-medium hover:text-gray-600">
-              MORE
-            </Link>
-          </div>
-        )}
-        <div className="flex justify-start sm:justify-center w-full">
-          <Link to="/">
-            <h2 className="text-2xl font-bold text-black">
-              {loggedInUser?.isAdmin ? "Admin" : "BAROSA"}
-            </h2>
-          </Link>
-          <div className="hidden md:block mx-4 w-full max-w-xl">
-            <SearchBar />
-          </div>
-        </div>
-
-        {/* Modified div to push icons more to the right on mobile */}
-        <div className="flex items-center gap-4 sm:gap-6 ml-auto mr-2 sm:mr-0">
-          {loggedInUser ? (
-            <>
-              {!loggedInUser.isAdmin && (
-                <>
-                  <div className="hidden sm:block">
-                    <IconWithBadge
-                      Icon={Love}
-                      count={wishlistItemsCount}
-                      onClick={() => handleRedirect("/wishlist")}
-                    />
-                  </div>
-
-                  <IconWithBadge
-                    Icon={Cart}
-                    count={cartItemsCount}
-                    onClick={() => handleRedirect("/cart")}
-                  />
-                </>
-              )}
-
-              <ProfileIcon
-                name={loggedInUser.name}
-                isAdmin={loggedInUser.isAdmin}
-                handleLogout={handleLogout}
-                handleRedirect={handleRedirect}
-                setProfileDropdown={setProfileDropdown}
-                profileDropdown={profileDropdown}
-              />
-            </>
-          ) : (
-            <>
-              <Profile
-                onClick={() => navigate("/login")}
-                className="w-5 h-5 cursor-pointer hover:text-gray-600"
-              />
-              <Love
-                onClick={() => navigate("/login")}
-                className="w-6 h-6 cursor-pointer hover:text-gray-600"
-              />
-              <Cart
-                onClick={() => navigate("/login")}
-                className="w-6 h-6 cursor-pointer hover:text-gray-600"
-              />
-            </>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button
-            className="p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={
-                  mobileMenuOpen
-                    ? "M6 18L18 6M6 6l12 12"
-                    : "M4 6h16M4 12h16m-7 6h7"
-                }
-              />
-            </svg>
-          </button>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="fixed top-16 left-0 w-full h-[calc(80vh-4rem)] bg-white shadow-lg z-50 overflow-y-auto">
-              <div className="py-4 px-6">
-                {loggedInUser && (
-                  <h1 className="font-semibold">Hey {loggedInUser.name}</h1>
-                )}
-                <Link
-                  to="/"
-                  className="block text-black mt-4 font-semibold"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Home
-                </Link>
-
-                {!loggedInUser?.isAdmin && (
+            {/* User Icons */}
+            {loggedInUser ? (
+              <>
+                {!loggedInUser.isAdmin && (
                   <>
-                    <div
-                      className="font-semibold cursor-pointer mt-4 flex justify-between items-center"
-                      onClick={() => toggleCategory("shop")}
-                    >
-                      <span>Shop</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className={`w-4 h-4 transform transition-transform duration-200 ${
-                          expandedCategory === "shop"
-                            ? "rotate-180"
-                            : "rotate-0"
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
+                    <div className="hidden sm:block">
+                      <IconWithBadge
+                        Icon={Love}
+                        count={wishlistItemsCount}
+                        onClick={() => handleRedirect("/wishlist")}
+                      />
                     </div>
 
-                    {expandedCategory === "shop" && (
-                      <div className="ml-4 mt-2">
-                        {categories.map((category) => (
-                          <div key={category._id} className="mb-3">
-                            <div
-                              className="mb-2 cursor-pointer font-semibold flex justify-between items-center"
-                              onClick={() => toggleSubCategory(category.name)}
-                            >
-                              <span>{category.name}</span>
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className={`w-4 h-4 transform transition-transform duration-200 ${
-                                  expandedSubCategory === category.name
-                                    ? "rotate-180"
-                                    : "rotate-0"
-                                }`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 9l-7 7-7-7"
-                                />
-                              </svg>
-                            </div>
-
-                            {expandedSubCategory === category.name && (
-                              <ul className="ml-4 text-sm space-y-2">
-                                {category.subCategory.map((sub) => (
-                                  <li
-                                    key={sub._id}
-                                    className="hover:text-black"
-                                    onClick={() => {
-                                      navigate(
-                                        `/categories/${category.name}/${sub.name}`
-                                      );
-                                      setMobileMenuOpen(false);
-                                    }}
-                                  >
-                                    {sub.name}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <IconWithBadge
+                      Icon={Cart}
+                      count={cartItemsCount}
+                      onClick={() => handleRedirect("/cart")}
+                    />
                   </>
                 )}
 
-                <Link
-                  to="/about-us"
-                  className="block text-black mt-4 font-semibold"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  About
-                </Link>
-                <Link
-                  to="/contact-us"
-                  className="block text-black mt-4 font-semibold"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Contact
-                </Link>
-
-                {/* Mobile menu user options */}
-                {loggedInUser && (
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    {loggedInUser.isAdmin ? (
-                      <>
-                        <Link
-                          to="/admin-dashboard"
-                          className="block py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Admin Dashboard
-                        </Link>
-                        <Link
-                          to="/admin/add-product"
-                          className="block py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Add Products
-                        </Link>
-                        <Link
-                          to="/admin/orders"
-                          className="block py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Manage Orders
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <Link
-                          to="/profile"
-                          className="block py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Profile
-                        </Link>
-                        <Link
-                          to="/orders"
-                          className="block py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          My Orders
-                        </Link>
-                        <Link
-                          to="/wishlist"
-                          className="block py-2 sm:hidden"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Wishlist ({wishlistItemsCount})
-                        </Link>
-                        <Link
-                          to="/cart"
-                          className="block py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Cart ({cartItemsCount})
-                        </Link>
-                      </>
-                    )}
-                    <button
-                      className="block w-full text-left py-2 text-red-500"
-                      onClick={() => {
-                        handleLogout();
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+                <ProfileIcon
+                  name={loggedInUser.name}
+                  isAdmin={loggedInUser.isAdmin}
+                  handleLogout={handleLogout}
+                  handleRedirect={handleRedirect}
+                  setProfileDropdown={setProfileDropdown}
+                  profileDropdown={profileDropdown}
+                />
+              </>
+            ) : (
+              <>
+                <Profile
+                  onClick={() => navigate("/login")}
+                  className="w-5 h-5 cursor-pointer hover:text-gray-600"
+                />
+                <Love
+                  onClick={() => navigate("/login")}
+                  className="w-6 h-6 cursor-pointer hover:text-gray-600"
+                />
+                <Cart
+                  onClick={() => navigate("/login")}
+                  className="w-6 h-6 cursor-pointer hover:text-gray-600"
+                />
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="fixed top-16 left-0 w-full h-[calc(80vh-4rem)] bg-white shadow-lg z-50 overflow-y-auto">
+            <div className="py-4 px-6">
+              {/* Search Bar in Mobile Menu */}
+              <div className="mb-4">
+                <SearchBar className="w-full" />
+              </div>
+            
+              {loggedInUser && (
+                <h1 className="font-semibold">Hey {loggedInUser.name}</h1>
+              )}
+              <Link
+                to="/"
+                className="block text-black mt-4 font-semibold"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+
+              {!loggedInUser?.isAdmin && (
+                <>
+                  <div
+                    className="font-semibold cursor-pointer mt-4 flex justify-between items-center"
+                    onClick={() => toggleCategory("shop")}
+                  >
+                    <span>Shop</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`w-4 h-4 transform transition-transform duration-200 ${
+                        expandedCategory === "shop"
+                          ? "rotate-180"
+                          : "rotate-0"
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+
+                  {expandedCategory === "shop" && (
+                    <div className="ml-4 mt-2">
+                      {categories.map((category) => (
+                        <div key={category._id} className="mb-3">
+                          <div
+                            className="mb-2 cursor-pointer font-semibold flex justify-between items-center"
+                            onClick={() => toggleSubCategory(category.name)}
+                          >
+                            <span>{category.name}</span>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className={`w-4 h-4 transform transition-transform duration-200 ${
+                                expandedSubCategory === category.name
+                                  ? "rotate-180"
+                                  : "rotate-0"
+                              }`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </div>
+
+                          {expandedSubCategory === category.name && (
+                            <ul className="ml-4 text-sm space-y-2">
+                              {category.subCategory.map((sub) => (
+                                <li
+                                  key={sub._id}
+                                  className="hover:text-black"
+                                  onClick={() => {
+                                    navigate(
+                                      `/categories/${category.name}/${sub.name}`
+                                    );
+                                    setMobileMenuOpen(false);
+                                  }}
+                                >
+                                  {sub.name}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              <Link
+                to="/about-us"
+                className="block text-black mt-4 font-semibold"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                to="/contact-us"
+                className="block text-black mt-4 font-semibold"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+
+              {/* Mobile menu user options */}
+              {loggedInUser && (
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  {loggedInUser.isAdmin ? (
+                    <>
+                      <Link
+                        to="/admin-dashboard"
+                        className="block py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Admin Dashboard
+                      </Link>
+                      <Link
+                        to="/admin/add-product"
+                        className="block py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Add Products
+                      </Link>
+                      <Link
+                        to="/admin/orders"
+                        className="block py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Manage Orders
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/profile"
+                        className="block py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="block py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        My Orders
+                      </Link>
+                      <Link
+                        to="/wishlist"
+                        className="block py-2 sm:hidden"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Wishlist ({wishlistItemsCount})
+                      </Link>
+                      <Link
+                        to="/cart"
+                        className="block py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Cart ({cartItemsCount})
+                      </Link>
+                    </>
+                  )}
+                  <button
+                    className="block w-full text-left py-2 text-red-500"
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
 const ProfileIcon = ({
   name,
   isAdmin,

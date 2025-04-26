@@ -11,7 +11,6 @@ export const SearchBar = ({ className = "" }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigate();
-  const products = useSelector((state) => state.products?.products);
 
   //Debounced search for suggestions
   useEffect(() => {

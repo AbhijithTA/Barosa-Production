@@ -68,7 +68,7 @@ function App() {
         <Route path="/categories/:categoryTitle" element={<CategroryLayout />}>
           <Route path=":subcategoryTitle" element={<SubcategoryLayout />} />
         </Route>
-        {/* <Route path="/search" element={<SearchResultsPage />} /> */}
+        <Route path="/search" element={<SearchResultsPage />} />
 
         {loggedInUser?.isAdmin ? (
           // admin routes

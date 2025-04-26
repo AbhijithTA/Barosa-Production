@@ -47,11 +47,6 @@ import {
   selectWishlistItems,
 } from "../../wishlist/WishlistSlice";
 import { useTheme } from "@mui/material";
-import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-// import SwipeableViews from "react-swipeable-views";
-// import { autoPlay } from "react-swipeable-views-utils";
-import MobileStepper from "@mui/material/MobileStepper";
 import Lottie from "lottie-react";
 import { loadingAnimation } from "../../../assets";
 import SizeChartModal from "../../../constants/SizeChartModal";
@@ -224,7 +219,7 @@ export const ProductDetails = () => {
 
   const handleSizeSelect = (size) => {
     setSelectedSize(size);
-    setQuantity(1); // Reset quanitiy when a new size is
+    setQuantity(1); 
   };
 
   const handleAddRemoveFromWishlist = (e) => {
@@ -237,20 +232,22 @@ export const ProductDetails = () => {
     }
   };
 
-  const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = product?.images.length;
+  // const [activeStep, setActiveStep] = React.useState(0);
+  // const maxSteps = product?.images.length;
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+  // const handleNext = () => {
+  //   setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  // };
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  // const handleBack = () => {
+  //   setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  // };
 
-  const handleStepChange = (step) => {
-    setActiveStep(step);
-  };
+  // const handleStepChange = (step) => {
+  //   setActiveStep(step);
+  // };
+
+  console.log("product", product);
 
   return (
     <>
@@ -471,10 +468,12 @@ export const ProductDetails = () => {
                           <motion.div onClick={() => setIsSizeChartOpen(true)}>
                             <p>Size Guide</p>
                           </motion.div>
-                          <SizeChartModal
+                          {/* <SizeChartModal
                             isOpen={isSizeChartOpen}
                             onClose={() => setIsSizeChartOpen(false)}
-                          />
+                            category={product?.category?.name}
+                            subCategory={product?.subcategory?.name}
+                          /> */}
                         </Stack>
                       </Stack>
 

@@ -44,7 +44,7 @@ const NewArrivalCategory = () => {
             title={category.title}
             buttonText={category.buttonText}
             image={category.image}
-            onClick={() => navigate(`/categories/${category.title}`)}
+            onClick={() => navigate(`/new-arrivals/${category.title}`)}
            />
         ))}
       </div>

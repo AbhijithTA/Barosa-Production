@@ -16,7 +16,7 @@ const CategoryCard = ({ title, buttonText, image }) => {
         <h3 className="text-white text-xl font-semibold mb-4">{title}</h3>
         <button
           className="px-6 py-2 bg-white text-black font-medium text-sm tracking-wide"
-          onClick={() => navigate(`/categories/${title}`)} // Use the `title` prop directly
+          onClick={() => navigate(`/new-arrivals/${title}`)} 
         >
           {buttonText}
         </button>

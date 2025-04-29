@@ -226,6 +226,7 @@ exports.getFeaturedProducts = async (req, res) => {
 
 exports.getLatestProducts = async (req, res) => {
   const categoryName = req.params.category;
+  console.log(categoryName, "categoryName");
 
   try {
     const category = await Category.findOne({ name: categoryName });
@@ -249,7 +250,7 @@ exports.getLatestProducts = async (req, res) => {
   }
 };
 
-exports.featuredProduct = async (req, res) => {
+exports.featuredProduct = async (req, res) => { 
   try {
     const { id } = req.params;
     const product = await Product.findById(id);

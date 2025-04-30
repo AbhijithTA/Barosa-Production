@@ -214,7 +214,7 @@ export const Navbar = () => {
           {/* Right Column - Search and User Icons */}
           <div className="flex items-center justify-end gap-4 sm:gap-6">
             {/* Expandable Search Bar */}
-            <div className="relative search-container">
+            <div className="relative search-container hidden sm:block">
               {searchExpanded ? (
                 <div className={`absolute right-0 w-64 md:w-80 transition-all duration-300 z-10 -top-3`}>
                   <SearchBar className="w-full" />

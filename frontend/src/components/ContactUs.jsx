@@ -35,7 +35,7 @@ const ContactUs = () => {
               </svg>
             </div>
             <h4 className="text-lg font-semibold text-gray-900 mt-4">Telephone</h4>
-            <p className="mt-2 text-gray-600">056-643-4873</p>
+            <p className="mt-2 text-gray-600">+971 2 445 9032</p>
           </div>
 
           {/* Email */}

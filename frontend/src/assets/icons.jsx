@@ -1,4 +1,4 @@
-export const Profile = ({ height = "25px", width = "25px", onClick }) => {
+export const Profile = ({ height = "20px", width = "20px", onClick }) => {
   return (
     <div>
       <svg

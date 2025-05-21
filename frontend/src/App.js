@@ -45,6 +45,7 @@ import { AboutUsPage } from "./pages/AboutUsPage";
 import { ContactUsPage } from "./pages/ContactUsPage";
 import { SearchResultsPage } from "./pages/SearchResultsPage";
 import NewArrivalsLayout from "./features/products/pages/NewArrivalsLayout";
+import PaymentProcessing from "./features/checkout/components/PaymentProcessing";
 
 function App() {
   const isAuthChecked = useSelector(selectIsAuthChecked);
@@ -89,6 +90,7 @@ function App() {
             <Route path="/cart" element={ <Protected> <CartPage /> </Protected> } />
             <Route path="/profile"element={ <Protected> <UserProfilePage /> </Protected> } />
             <Route  path="/checkout" element={ <Protected>  <CheckoutPage />  </Protected> }  />
+            <Route path="/payment-processing" element={<PaymentProcessing />} />
             <Route path="/order-success/:id" element={ <Protected>  <OrderSuccessPage />  </Protected> } />
             <Route  path="/orders"  element={ <Protected> <UserOrdersPage />  </Protected> } />
             <Route path="/wishlist" element={ <Protected> <WishlistPage />  </Protected>    } />

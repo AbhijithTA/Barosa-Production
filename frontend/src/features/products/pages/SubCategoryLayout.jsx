@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useProducts } from "../../../hooks/useProducts";
 import { Grid, Pagination, Stack, useMediaQuery, Box } from "@mui/material";
@@ -19,7 +19,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 const SubcategoryLayout = ({ isFilterOpen = false }) => {
   const { categoryTitle, subcategoryTitle } = useParams();
   const outletContext = useOutletContext();
-  const { categories = [], subCategories = [] } = outletContext || {};
+  const { categories = [], subCategories = [], sort } = outletContext || {};
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -30,6 +30,10 @@ const SubcategoryLayout = ({ isFilterOpen = false }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+
+  //lunu
+
+
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -45,13 +49,31 @@ const SubcategoryLayout = ({ isFilterOpen = false }) => {
       subCategory.name.toLowerCase() === subcategoryTitle?.toLowerCase()
   );
 
+const shouldFetch = !!(currentCategory?._id && currentSubCategory?._id);
+
+// Show a loader while waiting for category/subcategory to be resolved
+
+
+  
   const { products, fetchStatus, totalPages } = useProducts({
     category: currentCategory?._id,
     subCategory: currentSubCategory?._id,
-    sort: null,
+    sort,
     page: page,
     limit: 12,
+    skip: !shouldFetch,
   });
+
+if (!shouldFetch) {
+  return (
+    <Stack alignItems="center" justifyContent="center" height="50vh">
+      <Lottie
+        animationData={loadingAnimation}
+        style={{ width: isMobile ? 150 : 200 }}
+      />
+    </Stack>
+  );
+}
 
   const handleAddRemoveFromWishlist = (e, productId) => {
     if (e.target.checked) {

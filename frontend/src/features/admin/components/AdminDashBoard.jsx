@@ -11,18 +11,24 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Drawer,
+  Fab,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AddIcon from "@mui/icons-material/Add";
-import { selectBrands } from "../../brands/BrandSlice";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import { selectCategories } from "../../categories/CategoriesSlice";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import {
+  fetchAllCategoriesAsync,
+  selectCategories,
+} from "../../categories/CategoriesSlice";
 import { ProductCard } from "../../products/components/ProductCard";
 import {
   deleteProductByIdAsync,
@@ -30,15 +36,15 @@ import {
   selectProductIsFilterOpen,
   selectProductTotalResults,
   selectProducts,
+  softDeleteProductByIdAsync,
   toggleFilters,
   toggleProductFeaturedAsync,
   undeleteProductByIdAsync,
 } from "../../products/ProductSlice";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import ClearIcon from "@mui/icons-material/Clear";
 import { ITEMS_PER_PAGE } from "../../../constants";
-import { toggleProductFeatured } from "../../products/ProductApi";
 
 const sortOptions = [
   { name: "Price: low to high", sort: "price", order: "asc" },
@@ -46,8 +52,11 @@ const sortOptions = [
 ];
 
 export const AdminDashBoard = () => {
-  const [filters, setFilters] = useState({});
-  const brands = useSelector(selectBrands);
+  const [filters, setFilters] = useState({
+    category: [],
+    subcategory: [],
+  });
+
   const categories = useSelector(selectCategories);
   const [sort, setSort] = useState(null);
   const [page, setPage] = useState(1);
@@ -57,6 +66,9 @@ export const AdminDashBoard = () => {
   const is500 = useMediaQuery(theme.breakpoints.down(500));
   const isProductFilterOpen = useSelector(selectProductIsFilterOpen);
   const totalResults = useSelector(selectProductTotalResults);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   const is1200 = useMediaQuery(theme.breakpoints.down(1200));
   const is800 = useMediaQuery(theme.breakpoints.down(800));
@@ -67,28 +79,27 @@ export const AdminDashBoard = () => {
   useEffect(() => {
     setPage(1);
   }, [totalResults]);
+  
+  
 
   useEffect(() => {
-    const finalFilters = { ...filters };
+  const finalFilters = { ...filters };
 
-    finalFilters["pagination"] = { page: page, limit: ITEMS_PER_PAGE };
-    finalFilters["sort"] = sort;
 
-    dispatch(fetchProductsAsync(finalFilters));
-  }, [filters, sort, page]);
+  if (searchQuery) {
+    // Ignore pagination when searching
+    finalFilters.search = searchQuery;
+    delete finalFilters.pagination;
+  } else {
+    // Apply pagination only when not searching
+    finalFilters.pagination = { page: page, limit: ITEMS_PER_PAGE };
+  }
 
-  const handleBrandFilters = (e) => {
-    const filterSet = new Set(filters.brand);
+  finalFilters.sort = sort;
 
-    if (e.target.checked) {
-      filterSet.add(e.target.value);
-    } else {
-      filterSet.delete(e.target.value);
-    }
+  dispatch(fetchProductsAsync(finalFilters));
+}, [filters, sort, page, searchQuery]);
 
-    const filterArray = Array.from(filterSet);
-    setFilters({ ...filters, brand: filterArray });
-  };
 
   const handleCategoryFilters = (e) => {
     const filterSet = new Set(filters.category);
@@ -103,253 +114,387 @@ export const AdminDashBoard = () => {
     setFilters({ ...filters, category: filterArray });
   };
 
-  const handleProductDelete = (productId) => {
-    dispatch(deleteProductByIdAsync(productId));
-  };
 
+  const handleProductSoftDelete = (productId) => {
+  dispatch(softDeleteProductByIdAsync(productId));
+};
   const handleProductUnDelete = (productId) => {
     dispatch(undeleteProductByIdAsync(productId));
   };
 
-  const handleFilterClose = () => {
+  const handleProductDelete = (productId) => {
+    dispatch(deleteProductByIdAsync(productId));
+  };
+const handleDeleteClick = (productId) => {
+    setSelectedProductId(productId);
+    setOpenDialog(true);
+  };
+  const confirmDelete = async () => {
+  await dispatch(deleteProductByIdAsync(selectedProductId));
+  setOpenDialog(false);
+  setSelectedProductId(null);
+
+  // Refresh the product list
+  const finalFilters = { ...filters };
+  finalFilters["pagination"] = { page: page, limit: ITEMS_PER_PAGE };
+  finalFilters["sort"] = sort;
+
+  dispatch(fetchProductsAsync(finalFilters));
+};
+const cancelDelete = () => {
+    setOpenDialog(false);
+    setSelectedProductId(null);
+  };
+  const handleFilterToggle = () => {
     dispatch(toggleFilters());
   };
 
+  const [filteredProductId, setFilteredProductId] = useState(null);
+
+  const location = useLocation();
+
+  const productsToDisplay = products.filter(product => {
+  if (filteredProductId) {
+    return product._id === filteredProductId;
+  } else if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    return (
+      product.title.toLowerCase().includes(query) || 
+      (product.description && product.description.toLowerCase().includes(query))
+    );
+  }
+  return true;
+});
+
+  useEffect(() => {
+  if (location.state?.filteredProductId) {
+    setFilteredProductId(location.state.filteredProductId);
+    setSearchQuery('');
+    setPage(1);
+  } else if (location.state?.searchQuery) {
+    setSearchQuery(location.state.searchQuery);
+    setFilteredProductId(null);
+    setPage(1);
+  } else {
+    setFilteredProductId(null);
+    setSearchQuery('');
+  }
+}, [location.state]);
   const handleToggleFeatured = (productId) => {
     const product = products.find((prod) => prod._id === productId);
     const isFeatured = product.isFeatured;
-    console.log(isFeatured,"current state of featured");
     dispatch(
       toggleProductFeaturedAsync({ id: productId, isFeatured: !isFeatured })
     );
   };
 
+  useEffect(() => {
+    dispatch(fetchAllCategoriesAsync());
+  }, [dispatch]);
+
+  const handleSubcategoryFilters = (e) => {
+    const filterSet = new Set(filters.subcategory);
+
+    if (e.target.checked) {
+      filterSet.add(e.target.value);
+    } else {
+      filterSet.delete(e.target.value);
+    }
+
+    setFilters({ ...filters, subcategory: Array.from(filterSet) });
+  };
+
+  const FilterPanel = () => (
+    <Stack
+      p={2}
+      sx={{ 
+        height: "100%", 
+        width: is500 ? "100vw" : "25rem",
+        overflowY: "auto"
+      }}
+    >
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6">Filters</Typography>
+        <IconButton onClick={handleFilterToggle}>
+          <ClearIcon />
+        </IconButton>
+      </Stack>
+
+      {/* Category Filters */}
+      <Stack spacing={2} mb={2}>
+        <Accordion defaultExpanded>
+          <AccordionSummary
+            expandIcon={<AddIcon />}
+            aria-controls="category-filters"
+            id="category-filters"
+          >
+            <Typography>Category</Typography>
+          </AccordionSummary>
+
+          <AccordionDetails sx={{ p: 0 }}>
+            {categories?.map((category) => (
+              <div key={category._id} style={{ marginBottom: "0.5rem" }}>
+                {/* Category Checkbox */}
+                <FormGroup onChange={handleCategoryFilters}>
+                  <motion.div
+                    style={{ width: "fit-content" }}
+                    whileHover={{ x: 5 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <FormControlLabel
+                      sx={{ ml: 1 }}
+                      control={<Checkbox />}
+                      label={category.name}
+                      value={category._id}
+                      checked={filters.category.includes(category._id)}
+                    />
+                  </motion.div>
+                </FormGroup>
+
+                {/* Subcategory Checkboxes */}
+                <FormGroup sx={{ ml: 4 }} onChange={handleSubcategoryFilters}>
+                  {category.subCategory?.map((subcat) => (
+                    <FormControlLabel
+                      key={subcat._id}
+                      control={<Checkbox />}
+                      label={subcat.name}
+                      value={subcat._id}
+                      checked={filters.subcategory.includes(subcat._id)}
+                    />
+                  ))}
+                </FormGroup>
+              </div>
+            ))}
+          </AccordionDetails>
+        </Accordion>
+      </Stack>
+    </Stack>
+  );
+
   return (
     <>
-      <motion.div
-        style={{
+      {/* Filter button for mobile/tablet */}
+      <Fab
+        color="primary"
+        aria-label="filter"
+        sx={{
           position: "fixed",
-          backgroundColor: "white",
-          height: "100vh",
-          padding: "1rem",
-          overflowY: "scroll",
-          width: is500 ? "100vw" : "30rem",
-          zIndex: 500,
+          bottom: 16,
+          right: 16,
+          zIndex: 999,
+          display: { xs: "flex", md: "none" }
         }}
-        variants={{ show: { left: 0 }, hide: { left: -500 } }}
-        initial={"hide"}
-        transition={{ ease: "easeInOut", duration: 0.7, type: "spring" }}
-        animate={isProductFilterOpen === true ? "show" : "hide"}
+        onClick={handleFilterToggle}
       >
-        {/* fitlers section */}
-        <Stack
-          mb={"5rem"}
-          sx={{ scrollBehavior: "smooth", overflowY: "scroll" }}
-        >
-          <Typography variant="h4">New Arrivals</Typography>
+        <FilterListIcon />
+      </Fab>
 
-          <IconButton
-            onClick={handleFilterClose}
-            style={{ position: "absolute", top: 15, right: 15 }}
+      {/* Filter panel drawer */}
+      <Drawer
+        variant={is600 ? "temporary" : "persistent"}
+        anchor="left"
+        open={isProductFilterOpen}
+        onClose={handleFilterToggle}
+        sx={{
+          width: isProductFilterOpen ? (is500 ? "100%" : "25rem") : 0,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: is500 ? "100%" : "25rem",
+            boxSizing: 'border-box',
+          },
+        }}
+      >
+        <FilterPanel />
+      </Drawer>
+
+      <Stack 
+        rowGap={5} 
+        mt={is600 ? 2 : 5} 
+        mb={"3rem"}
+        sx={{
+          marginLeft: isProductFilterOpen && !is600 ? (is500 ? "0" : "25rem") : 0,
+          transition: "margin 0.3s ease",
+          width: "100%",
+          padding: { xs: '0 1rem', sm: '0 2rem' }
+        }}
+      >
+        {/* Top bar with filter & sort options */}
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent={{ xs: 'flex-start', sm: 'space-between' }}
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+          spacing={2}
+          width="100%"
+          p={2}
+        >
+          {/* Filter button for desktop */}
+          <Button 
+            variant="outlined"
+            startIcon={<FilterListIcon />}
+            onClick={handleFilterToggle}
+            sx={{ display: { xs: 'none', md: 'flex' } }}
           >
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <ClearIcon fontSize="medium" />
-            </motion.div>
-          </IconButton>
+            {isProductFilterOpen ? "Hide Filters" : "Show Filters"}
+          </Button>
 
-          {/* <Stack rowGap={2} mt={4} >
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Totes</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Backpacks</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Travel Bags</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Hip Bags</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Laptop Sleeves</Typography>
-        </Stack> */}
-
-          {/* brand filters */}
-          <Stack mt={2}>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<AddIcon />}
-                aria-controls="brand-filters"
-                id="brand-filters"
-              >
-                <Typography>Brands</Typography>
-              </AccordionSummary>
-
-              <AccordionDetails sx={{ p: 0 }}>
-                <FormGroup onChange={handleBrandFilters}>
-                  {brands?.map((brand) => (
-                    <motion.div
-                      style={{ width: "fit-content" }}
-                      whileHover={{ x: 5 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <FormControlLabel
-                        sx={{ ml: 1 }}
-                        control={<Checkbox whileHover={{ scale: 1.1 }} />}
-                        label={brand.name}
-                        value={brand._id}
-                      />
-                    </motion.div>
-                  ))}
-                </FormGroup>
-              </AccordionDetails>
-            </Accordion>
-          </Stack>
-
-          {/* category filters */}
-          <Stack mt={2}>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<AddIcon />}
-                aria-controls="brand-filters"
-                id="brand-filters"
-              >
-                <Typography>Category</Typography>
-              </AccordionSummary>
-
-              <AccordionDetails sx={{ p: 0 }}>
-                <FormGroup onChange={handleCategoryFilters}>
-                  {categories?.map((category) => (
-                    <motion.div
-                      style={{ width: "fit-content" }}
-                      whileHover={{ x: 5 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <FormControlLabel
-                        sx={{ ml: 1 }}
-                        control={<Checkbox whileHover={{ scale: 1.1 }} />}
-                        label={category.name}
-                        value={category._id}
-                      />
-                    </motion.div>
-                  ))}
-                </FormGroup>
-              </AccordionDetails>
-            </Accordion>
-          </Stack>
-        </Stack>
-      </motion.div>
-
-      <Stack rowGap={5} mt={is600 ? 2 : 5} mb={"3rem"}>
-        {/* sort options */}
-
-        <Stack
-          flexDirection={"row"}
-          mr={"2rem"}
-          justifyContent={"flex-end"}
-          alignItems={"center"}
-          columnGap={5}
-        >
-          <Stack alignSelf={"flex-end"} width={"12rem"}>
-            <FormControl fullWidth>
-              <InputLabel id="sort-dropdown">Sort</InputLabel>
-              <Select
-                variant="standard"
-                labelId="sort-dropdown"
-                label="Sort"
-                onChange={(e) => setSort(e.target.value)}
-                value={sort}
-              >
-                <MenuItem bgcolor="text.secondary" value={null}>
-                  Reset
+          {/* Sort dropdown */}
+          <FormControl sx={{ minWidth: 150, maxWidth: 250 }}>
+            <InputLabel id="sort-dropdown">Sort</InputLabel>
+            <Select
+              variant="outlined"
+              labelId="sort-dropdown"
+              label="Sort"
+              onChange={(e) => setSort(e.target.value)}
+              value={sort || ""}
+              size={is488 ? "small" : "medium"}
+            >
+              <MenuItem value="">
+                Reset
+              </MenuItem>
+              {sortOptions.map((option, index) => (
+                <MenuItem key={index} value={option}>
+                  {option.name}
                 </MenuItem>
-                {sortOptions.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
+              ))}
+            </Select>
+          </FormControl>
         </Stack>
 
+        {/* Products grid */}
         <Grid
-          gap={2}
           container
-          flex={1}
-          justifyContent={"center"}
-          alignContent={"center"}
+          spacing={2}
+          justifyContent="center"
         >
-          {products.map((product) => (
-            <Stack>
-              <Stack sx={{ opacity: product.isDeleted ? 0.7 : 1 }}>
-                <ProductCard
-                  key={product._id}
-                  id={product._id}
-                  title={product.title}
-                  thumbnail={product.thumbnail}
-                  // brand={product.brand.name}
-                  price={product.price}
-                  isAdminCard={true}
-                />
-              </Stack>
-              <Stack
-                paddingLeft={2}
-                paddingRight={2}
-                flexDirection={"row"}
-                justifySelf={"flex-end"}
-                alignSelf={"flex-end"}
-                columnGap={is488 ? 1 : 2}
-              >
-                <Button
-                  component={Link}
-                  to={`/admin/product-update/${product._id}`}
-                  variant="contained"
-                >
-                  Update
-                </Button>
-                {product.isDeleted === true ? (
-                  <Button
-                    onClick={() => handleProductUnDelete(product._id)}
-                    color="error"
-                    variant="outlined"
-                  >
-                    Un-delete
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => handleProductDelete(product._id)}
-                    color="error"
-                    variant="outlined"
-                  >
-                    Delete
-                  </Button>
-                )}
-                <Button
-                  onClick={() => handleToggleFeatured(product._id)}
-                  color="primary"
-                  variant="outlined"
-                >
-                  {product.isFeatured ? "Remove from Featured" : "Add to Featured"}
-                </Button>
-              </Stack>
+          {productsToDisplay.length === 0 ? (
+            <Stack width="100%" alignItems="center" mt={5}>
+              <Typography variant="h6">No products found</Typography>
             </Stack>
-          ))}
+          ) : (
+            productsToDisplay.map((product) => (
+              <Grid item key={product._id} xs={12} sm={6} md={4} lg={3}>
+                <Stack
+                  sx={{
+                    height: '100%',
+                    opacity: product.isDeleted ? 0.7 : 1,
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    transition: 'transform 0.3s, box-shadow 0.3s',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                      boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
+                    }
+                  }}
+                >
+                  <ProductCard
+                    id={product._id}
+                    title={product.title}
+                    thumbnail={product.thumbnail}
+                    price={product.price}
+                    isAdminCard={true}
+                  />
+                  
+                  <Stack
+                    p={2}
+                    spacing={1}
+                    direction="column"
+                  >
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        component={Link}
+                        to={`/admin/product-update/${product._id}`}
+                        variant="contained"
+                        size={is488 ? "small" : "medium"}
+                        fullWidth
+                      >
+                        Update
+                      </Button>
+                      
+                      {product.isDeleted ? (
+                        <Button
+                          onClick={() => handleProductUnDelete(product._id)}
+                          color="success"
+                          variant="outlined"
+                          size={is488 ? "small" : "medium"}
+                          fullWidth
+                        >
+                          Un-Hide
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => handleProductSoftDelete(product._id)}
+                          color="error"
+                          variant="outlined"
+                          size={is488 ? "small" : "medium"}
+                          fullWidth
+                        >
+                          Hide
+                        </Button>
+                      )}
+                    </Stack>
+                    <Button
+        onClick={() => handleDeleteClick(product._id)}
+        color="error"
+        variant="outlined"
+      >
+        Delete
+      </Button>
+
+      <Dialog open={openDialog} onClose={cancelDelete}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>Do you really want to delete this product?</DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete} color="primary">
+            No
+          </Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+                    
+                    <Button
+                      onClick={() => handleToggleFeatured(product._id)}
+                      color={product.isFeatured ? "secondary" : "primary"}
+                      variant="outlined"
+                      size={is488 ? "small" : "medium"}
+                      fullWidth
+                    >
+                      {product.isFeatured ? "Remove Featured" : "Make Featured"}
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Grid>
+            ))
+          )}
         </Grid>
 
-        <Stack
-          alignSelf={is488 ? "center" : "flex-end"}
-          mr={is488 ? 0 : 5}
-          rowGap={2}
-          p={is488 ? 1 : 0}
-        >
-          <Pagination
-            size={is488 ? "medium" : "large"}
-            page={page}
-            onChange={(e, page) => setPage(page)}
-            count={Math.ceil(totalResults / ITEMS_PER_PAGE)}
-            variant="outlined"
-            shape="rounded"
-          />
-          <Typography textAlign={"center"}>
-            Showing {(page - 1) * ITEMS_PER_PAGE + 1} to{" "}
-            {page * ITEMS_PER_PAGE > totalResults
-              ? totalResults
-              : page * ITEMS_PER_PAGE}{" "}
-            of {totalResults} results
-          </Typography>
-        </Stack>
+        {/* Pagination */}
+        {totalResults > 0 && (
+          <Stack 
+            spacing={2} 
+            alignItems="center"
+            mt={3}
+            mb={5}
+          >
+            <Pagination
+              size={is488 ? "small" : "medium"}
+              page={page}
+              onChange={(e, page) => setPage(page)}
+              count={Math.ceil(totalResults / ITEMS_PER_PAGE)}
+              variant="outlined"
+              shape="rounded"
+            />
+            <Typography variant="body2" color="text.secondary">
+              Showing {(page - 1) * ITEMS_PER_PAGE + 1} to{" "}
+              {page * ITEMS_PER_PAGE > totalResults
+                ? totalResults
+                : page * ITEMS_PER_PAGE}{" "}
+              of {totalResults} results
+            </Typography>
+          </Stack>
+        )}
       </Stack>
     </>
   );

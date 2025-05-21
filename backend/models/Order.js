@@ -24,6 +24,9 @@ const orderSchema = new Schema(
       type: Schema.Types.Mixed,
       required: true,
     },
+    stripeSessionId: {
+    type: String
+  },
     status: {
       type: String,
       enum: ["Pending", "Dispatched", "Out for delivery", "Cancelled"],

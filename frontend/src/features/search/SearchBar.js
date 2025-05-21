@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { debounce } from "lodash";
 import { fetchProductSuggestions } from "../products/ProductApi";
+import { selectLoggedInUser } from "../auth/AuthSlice";
 
 
 
@@ -11,11 +12,12 @@ export const SearchBar = ({ className = "" }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigate();
+  const loggedInUser = useSelector(selectLoggedInUser);
 
   //Debounced search for suggestions
   useEffect(() => {
     const debouncedFetch = debounce(async () => {
-      if (searchTerm.trim().length > 1) {
+      if ((searchTerm || "").trim().length > 1) {
         try {
           const suggestedProducts = await fetchProductSuggestions(searchTerm);
           setSuggestions(suggestedProducts);
@@ -36,7 +38,18 @@ export const SearchBar = ({ className = "" }) => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
+      if (loggedInUser?.isAdmin) {
+        // Admin path - go to dashboard with search term
+        navigate('/admin/dashboard', { 
+          state: { 
+            searchQuery: searchTerm,
+            fromSearch: true 
+          } 
+        });
+      } else {
+        // Regular user path - go to search results page
+        navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
+      }
       setSuggestions([]);
     }
   };
@@ -44,12 +57,12 @@ export const SearchBar = ({ className = "" }) => {
 
   return (
     <div className={`relative ${className}`}>
-      <form onSubmit={handleSearch} className="flex">
+      <form onSubmit={handleSearch} className="flex  ">
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2  border border-gray-300 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-black focus:border-transparent"
           placeholder="Search Products..."
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           onFocus={() => setIsFocused(true)}
@@ -57,7 +70,7 @@ export const SearchBar = ({ className = "" }) => {
 
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+          className="px-4 py-2 bg-black text-white rounded-r-lg hover:bg-gray-4Search00 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -83,9 +96,22 @@ export const SearchBar = ({ className = "" }) => {
             <div
               key={product._id}
               onMouseDown={() => {
-                navigate(`/product-details/${product._id}`);
-                setSearchTerm(product.name);
-                setSuggestions([]);
+                if (loggedInUser?.isAdmin) {
+            // Admin path - go to dashboard with filtered product in state
+            navigate('/admin/dashboard', { 
+              state: { 
+                // filteredProductId: product._id,
+                productId: product._id,  // More descriptive name
+                searchQuery: product.title, // Keep search term if needed
+                fromSearch: true 
+              } 
+            });
+          } else {
+            // Regular user path - go directly to product details
+            navigate(`/product-details/${product._id}`);
+          }
+          setSearchTerm(product.title || product.name);
+          setSuggestions([]);
               }}
               className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150 border-b border-gray-100 last:border-b-0"
             >

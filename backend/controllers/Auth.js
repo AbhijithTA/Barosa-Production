@@ -144,6 +144,7 @@ exports.resendOtp=async(req,res)=>{
         res.status(500).json({'message':"Some error occured while resending otp, please try again later"})
         console.log(error);
     }
+    
 }
 
 exports.forgotPassword=async(req,res)=>{

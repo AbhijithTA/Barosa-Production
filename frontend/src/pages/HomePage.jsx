@@ -10,6 +10,7 @@ import { Footer } from "../features/footer/Footer";
 import { ProductFeatured } from "../features/products/components/ProductFeatured.jsx";
 import ShopByCategory from "../features/products/components/ProductCategoryBanner.jsx";
 import NewArrivalCategory from "../features/products/components/NewArrivalCategory.jsx";
+import { ProductBanner } from "../features/products/components/ProductBanner.jsx";
 
 export const HomePage = () => {
   const dispatch = useDispatch();
@@ -26,7 +27,8 @@ export const HomePage = () => {
     <>
       <Navbar />
       <div className="pt-[65px]">
-        <HeroBanner />
+        {/* <HeroBanner /> */}
+        <ProductBanner/>
         <div className="pt-[50px]">
           <NewArrivalCategory />
         </div>

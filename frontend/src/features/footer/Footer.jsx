@@ -166,12 +166,12 @@ export const Footer = () => {
 
         <Stack rowGap={"1rem"} padding={"1rem"}>
           <Typography variant="h6">Account</Typography>
-          <Link to="/my-account" style={{ textDecoration: "none" }}>
+          <Link to="/profile" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>My Account</Typography>
           </Link>
-          <Link to="/login" style={{ textDecoration: "none" }}>
+          {/* <Link to="/login" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>Login / Register</Typography>
-          </Link>
+          </Link> */}
           <Link to="/cart" style={{ textDecoration: "none" }}>
             <Typography sx={labelStyles}>Cart</Typography>
           </Link>

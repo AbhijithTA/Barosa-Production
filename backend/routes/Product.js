@@ -1,9 +1,15 @@
 const express = require("express");
 const productController = require("../controllers/Product");
 const router = express.Router();
+// import upload from "../config/multer.config.js";
+const upload = require("../config/multer.config.js");
+
 
 router
-  .post("/", productController.create)
+  .post("/",upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "images", maxCount: 4 },
+  ]), productController.create)
   .get("/", productController.getAll)
 
 
@@ -16,8 +22,26 @@ router
   
   .get("/:id", productController.getById)
 
-  .patch("/:id", productController.updateById)
+.patch(
+  "/:id",
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "images", maxCount: 4 },
+  ]),
+  productController.updateById
+)
+// })
+//   .patch(
+//   "/:id",
+//   upload.fields([
+//     { name: "thumbnail", maxCount: 1 },
+//     { name: "images", maxCount: 4 },
+//   ]),
+//   productController.updateById
+// )
   .patch("/undelete/:id", productController.undeleteById)
+  .patch("/hide/:id", productController.softdeleteById)
+  .patch("/unhide/:id", productController.undeleteById)
   .delete("/:id", productController.deleteById);
 
 module.exports = router;

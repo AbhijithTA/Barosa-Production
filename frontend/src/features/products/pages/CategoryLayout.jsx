@@ -12,7 +12,6 @@ import {
   MenuItem,
   useMediaQuery,
   IconButton,
-  Tooltip,
   Menu,
   Button,
 } from "@mui/material";
@@ -27,7 +26,7 @@ import {
 } from "../../wishlist/WishlistSlice";
 import { selectLoggedInUser } from "../../auth/AuthSlice";
 // Import icons
-import MenuIcon from "@mui/icons-material/Menu";
+// import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -40,7 +39,7 @@ const CategoryLayout = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [sort, setSort] = useState(null);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  
+
   // For mobile category dropdown
   const [categoryMenuAnchor, setCategoryMenuAnchor] = useState(null);
   const categoryMenuOpen = Boolean(categoryMenuAnchor);
@@ -54,7 +53,6 @@ const CategoryLayout = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down(700));
 
-  
   useEffect(() => {
     if (isMobile || isTablet) {
       setSidebarExpanded(false);
@@ -102,42 +100,13 @@ const CategoryLayout = () => {
     setSubCategories(currentCategory?.subCategory || []);
   }, [categoryTitle, categories]);
 
-  // Fetch products
-  useEffect(() => {
-    if (!subcategoryTitle) {
-      const fetchProducts = async () => {
-        try {
-          setFetchStatus("pending");
-
-          const productResponse = await axiosi.get("/products", {
-            params: {
-              category: categoryTitle,
-              subCategory: subcategoryTitle || undefined,
-              sort: sort?.sort,
-              order: sort?.order,
-            },
-          });
-          setProducts(productResponse.data);
-          setFetchStatus("fulfilled");
-        } catch (error) {
-          console.error("Error fetching products:", error);
-          setFetchStatus("error");
-        }
-      };
-      
-      fetchProducts();
-    }
-    else {
-      setProducts([]);
-      setFetchStatus("idle");
-    }
-  }, [categoryTitle, sort, subcategoryTitle]);
+  if (!categoryTitle) return null; // don't render anything if no category
 
   const handleSubCategoryClick = (subcategoryTitle) => {
     const encodedName = encodeURIComponent(subcategoryTitle);
     navigate(`/categories/${categoryTitle}/${encodedName}`);
     handleCloseCategoryMenu();
-    
+
     // Auto-collapse sidebar on mobile after selection
     if (isMobile) {
       setSidebarExpanded(false);
@@ -169,32 +138,40 @@ const CategoryLayout = () => {
         {/* Header bar for mobile - Categories and Sort */}
         {isMobile && (
           <div className="bg-white p-2 border-b border-gray-200 flex justify-between items-center">
-            <Button 
-              variant="outlined" 
-              size="small" 
+            <Button
+              variant="outlined"
+              size="small"
               startIcon={<CategoryIcon />}
               onClick={handleOpenCategoryMenu}
-              sx={{ 
-                textTransform: 'none',
-                fontSize: '0.8rem', 
+              sx={{
+                textTransform: "none",
+                fontSize: "0.8rem",
                 mr: 1,
-                maxWidth: '50%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
+                maxWidth: "50%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {categoryTitle}
             </Button>
-            
-            <FormControl variant="standard" size="small" sx={{ minWidth: 120, maxWidth: '50%' }}>
+
+            <FormControl
+              variant="standard"
+              size="small"
+              sx={{ minWidth: 120, maxWidth: "50%" }}
+            >
               <InputLabel>Sort</InputLabel>
               <Select
                 value={sort?.name || ""}
-                onChange={(e) =>
-                  setSort(sortOptions.find((o) => o.name === e.target.value))
-                }
-                sx={{ fontSize: '0.8rem' }}
+                onChange={(e) => {
+                  const selectedSort = sortOptions.find(
+                    (o) => o.name === e.target.value
+                  );
+                  console.log("Selected sort option:", selectedSort); // <-- Console log here
+                  setSort(selectedSort);
+                }}
+                sx={{ fontSize: "0.8rem" }}
               >
                 <MenuItem value="">Reset</MenuItem>
                 {sortOptions.map((option) => (
@@ -204,7 +181,7 @@ const CategoryLayout = () => {
                 ))}
               </Select>
             </FormControl>
-            
+
             {/* Mobile Categories Menu */}
             <Menu
               anchorEl={categoryMenuAnchor}
@@ -213,21 +190,21 @@ const CategoryLayout = () => {
               PaperProps={{
                 style: {
                   maxHeight: 300,
-                  width: '80vw',
+                  width: "80vw",
                   maxWidth: 300,
-                }
+                },
               }}
             >
               <MenuItem disabled>
                 <div className="font-bold">{categoryTitle} - Subcategories</div>
               </MenuItem>
-              
+
               {subCategories.length > 0 ? (
                 subCategories.map((subCategory) => (
-                  <MenuItem 
+                  <MenuItem
                     key={subCategory._id}
                     onClick={() => handleSubCategoryClick(subCategory.name)}
-                    sx={{ fontSize: '0.9rem' }}
+                    sx={{ fontSize: "0.9rem" }}
                   >
                     {subCategory.name}
                   </MenuItem>
@@ -238,7 +215,7 @@ const CategoryLayout = () => {
             </Menu>
           </div>
         )}
-        
+
         <div className="flex flex-1 overflow-hidden">
           {/* Desktop sidebar toggle button */}
           {!sidebarExpanded && !isMobile && (
@@ -251,10 +228,10 @@ const CategoryLayout = () => {
 
           {/* Left Sidebar - Only visible on desktop/tablet */}
           {!isMobile && (
-            <div 
+            <div
               className={`bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out ${
-                sidebarExpanded 
-                  ? "w-[20vw] min-w-[250px]" 
+                sidebarExpanded
+                  ? "w-[20vw] min-w-[250px]"
                   : "w-0 min-w-0 overflow-hidden"
               }`}
             >
@@ -282,7 +259,9 @@ const CategoryLayout = () => {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-500 text-sm p-4">No subcategories available.</p>
+                <p className="text-gray-500 text-sm p-4">
+                  No subcategories available.
+                </p>
               )}
             </div>
           )}
@@ -291,9 +270,9 @@ const CategoryLayout = () => {
           <div className="flex-1 p-3 sm:p-6 bg-gray-50 overflow-y-auto">
             {/* Desktop sort controls */}
             {!isMobile && (
-              <Stack 
-                direction="row" 
-                justifyContent="flex-end" 
+              <Stack
+                direction="row"
+                justifyContent="flex-end"
                 alignItems="center"
                 spacing={2}
                 sx={{ mb: 2 }}
@@ -303,7 +282,9 @@ const CategoryLayout = () => {
                   <Select
                     value={sort?.name || ""}
                     onChange={(e) =>
-                      setSort(sortOptions.find((o) => o.name === e.target.value))
+                      setSort(
+                        sortOptions.find((o) => o.name === e.target.value)
+                      )
                     }
                   >
                     <MenuItem value="">Reset</MenuItem>
@@ -319,7 +300,7 @@ const CategoryLayout = () => {
 
             {/* Render Products or Subcategory Layout */}
             {subcategoryTitle ? (
-              <Outlet context={{ categories, subCategories }} />
+              <Outlet context={{ categories, subCategories, sort }} />
             ) : (
               <>
                 {fetchStatus === "pending" ? (
@@ -328,7 +309,10 @@ const CategoryLayout = () => {
                     justifyContent="center"
                     height="50vh"
                   >
-                    <Lottie animationData={loadingAnimation} style={{ width: isMobile ? 150 : 200 }} />
+                    <Lottie
+                      animationData={loadingAnimation}
+                      style={{ width: isMobile ? 150 : 200 }}
+                    />
                   </Stack>
                 ) : fetchStatus === "error" ? (
                   <p className="text-center text-red-500">
@@ -342,12 +326,12 @@ const CategoryLayout = () => {
                     sx={{ padding: isMobile ? "4px" : "16px" }}
                   >
                     {products.map((product) => (
-                      <Grid 
-                        item 
-                        xs={6} 
-                        sm={6} 
-                        md={4} 
-                        lg={3} 
+                      <Grid
+                        item
+                        xs={6}
+                        sm={6}
+                        md={4}
+                        lg={3}
                         key={product._id}
                         sx={{ padding: isMobile ? "4px" : undefined }}
                       >
@@ -356,8 +340,12 @@ const CategoryLayout = () => {
                           title={product.title}
                           thumbnail={product.thumbnail}
                           price={product.price}
-                          handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}
-                          onClick={() => navigate(`/product-details/${product._id}`)}
+                          handleAddRemoveFromWishlist={
+                            handleAddRemoveFromWishlist
+                          }
+                          onClick={() =>
+                            navigate(`/product-details/${product._id}`)
+                          }
                         />
                       </Grid>
                     ))}

@@ -17,7 +17,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Cart } from "../../cart/components/Cart";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,16 +67,20 @@ export const Checkout = () => {
   const is900 = useMediaQuery(theme.breakpoints.down(900));
   const is480 = useMediaQuery(theme.breakpoints.down(480));
 
-  useEffect(() => {
-    if (currentOrder && currentOrder?._id) {
-      if (selectedPaymentMethod === "CARD") {
-        cardPayment(currentOrder);
-      } else if (selectedPaymentMethod === "COD") {
-        dispatch(resetCartByUserIdAsync(loggedInUser?._id));
-        navigate(`/order-success/${currentOrder?._id}`);
-      }
-    }
-  }, [currentOrder, dispatch, navigate, selectedPaymentMethod, loggedInUser?._id]);
+ // useEffect(() => {
+//   const handlePayment = async () => {
+//     if (currentOrder && currentOrder?._id) {
+//       if (selectedPaymentMethod === "CARD") {
+//         await cardPayment(currentOrder);
+//       } else if (selectedPaymentMethod === "COD") {
+//         dispatch(resetCartByUserIdAsync(loggedInUser?._id));
+//         navigate(`/order-success/${currentOrder?._id}`);
+//       }
+//     }
+//   };
+
+//   handlePayment();
+// }, [currentOrder, dispatch, navigate, selectedPaymentMethod, loggedInUser?._id]);
 
   const handleAddAddress = async (data) => {
     const address = { ...data, user: loggedInUser._id };
@@ -89,48 +93,48 @@ export const Checkout = () => {
     }
   };
 
-  const cardPayment = async (order) => {
-    // const stripe = await loadStripe(
-    //   "pk_test_51QjOA0GSJadpZs7UjNwfZavVBqN4AH2FDxM5TopwdWTLcUwPxOap3jBhxHiK1RjVpIG5llYMkLGMbODqHOhW7SAV00xMAlfftf"
-    // );
-    const stripe = await loadStripe(
-      "pk_live_51QjOA0GSJadpZs7U3LiJV58oh3a8CMiUrGazsBZyfPY4ZUJZXFpQYtmAOdYsTQKRsTVb2sdjHeGBz7nFe8txEWsp00cTrsXdB1"
-    );
+  // const cardPayment = async (order) => {
+  //   // const stripe = await loadStripe(
+  //   //   "pk_test_51QjOA0GSJadpZs7UjNwfZavVBqN4AH2FDxM5TopwdWTLcUwPxOap3jBhxHiK1RjVpIG5llYMkLGMbODqHOhW7SAV00xMAlfftf"
+  //   // );
+  //   const stripe = await loadStripe(
+  //     "pk_live_51QjOA0GSJadpZs7U3LiJV58oh3a8CMiUrGazsBZyfPY4ZUJZXFpQYtmAOdYsTQKRsTVb2sdjHeGBz7nFe8txEWsp00cTrsXdB1"
+  //   );
 
-    try {
-      const response = await axiosi.post(
-        "/checkout/create-checkout-session",
-        {
-          products: cartItems,
-          order,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  //   try {
+  //     const response = await axiosi.post(
+  //       "/checkout/create-checkout-session",
+  //       {
+  //         products: cartItems,
+  //         order,
+  //       },
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
 
-      // handle response if the payment is successfull
-      if (response.status === 200) {
-        const sessionId = response.data.id;
+  //     // handle response if the payment is successfull
+  //     if (response.status === 200) {
+  //       const sessionId = response.data.id;
 
-        //redirecting to Stripe checkout
-        const { error } = await stripe.redirectToCheckout({ sessionId });
+  //       //redirecting to Stripe checkout
+  //       const { error } = await stripe.redirectToCheckout({ sessionId });
 
-        if (error) {
-          console.error("Error redirecting to stripe checkout", error);
-          alert("Payment failed. Please try again later");
-        }
-      } else {
-        console.error("Error inititated payment", response.data);
-        alert("Payment initiation  failed. Please try again later");
-      }
-    } catch (err) {
-      console.error("Error with the card payment", err);
-      alert("An error occurred. Please try again later");
-    }
-  };
+  //       if (error) {
+  //         console.error("Error redirecting to stripe checkout", error);
+  //         alert("Payment failed. Please try again later");
+  //       }
+  //     } else {
+  //       console.error("Error inititated payment", response.data);
+  //       alert("Payment initiation  failed. Please try again later");
+  //     }
+  //   } catch (err) {
+  //     console.error("Error with the card payment", err);
+  //     alert("An error occurred. Please try again later");
+  //   }
+  // };
 
   useEffect(() => {
     if (addressStatus === "fulfilled") {
@@ -140,36 +144,97 @@ export const Checkout = () => {
     }
   }, [addressStatus, reset]);
 
-  const handleCreateOrder = async () => {
-    const order = {
-      user: loggedInUser._id,
-      items: cartItems.map((item) => ({
-        product: item.product._id, 
-        quantity: item.quantity,
-        size: item.size,
-      })),
-      address: selectedAddress,
-      paymentMode: selectedPaymentMethod,
-      total: orderTotal + SHIPPING + TAXES,
-    };
-    if (selectedPaymentMethod === "COD") {
-      //dispatching the action to create and get order id
-      const createdOrder = await dispatch(createOrderAsync(order)).unwrap();
-      console.log(
-        createdOrder,
-        "this is the order id getting from the order id in the reduc"
+  // const handleCreateOrder = async () => {
+  //   const order = {
+  //     user: loggedInUser._id,
+  //     items: cartItems.map((item) => ({
+  //       product: item.product._id, 
+  //       quantity: item.quantity,
+  //       size: item.size,
+  //     })),
+  //     address: selectedAddress,
+  //     paymentMode: selectedPaymentMethod,
+  //     total: orderTotal + SHIPPING + TAXES,
+  //   };
+  //   if (selectedPaymentMethod === "COD") {
+  //     //dispatching the action to create and get order id
+  //     const createdOrder = await dispatch(createOrderAsync(order)).unwrap();
+  //     console.log(
+  //       createdOrder,
+  //       "this is the order id getting from the order id in the reduc"
+  //     );
+
+  //     if (createdOrder?._id) {
+  //       navigate(`/order-success/${createdOrder._id}`);
+  //     }
+
+  //     //creating order directly
+  //     // dispatch(createOrderAsync(order));
+  //   } else if (selectedPaymentMethod === "CARD") {
+  //     dispatch(createOrderAsync(order));
+  //   }
+  // };
+
+
+const handleCreateOrder = async () => {
+  const orderData = {
+    user: loggedInUser._id,
+    items: cartItems.map((item) => ({
+      product: item.product._id,
+      quantity: item.quantity,
+      size: item.size,
+    })),
+    address: selectedAddress,
+    paymentMode: selectedPaymentMethod,
+    total: orderTotal + SHIPPING + TAXES,
+  };
+
+  if (selectedPaymentMethod === "COD") {
+    // For COD, create order immediately
+    const createdOrder = await dispatch(createOrderAsync(orderData)).unwrap();
+    if (createdOrder?._id) {
+      dispatch(resetCartByUserIdAsync(loggedInUser?._id));
+      navigate(`/order-success/${createdOrder._id}`);
+    }
+  } else if (selectedPaymentMethod === "CARD") {
+    // For card payment, redirect to Stripe first
+    try {
+      const stripe = await loadStripe(
+        "pk_live_51QjOA0GSJadpZs7U3LiJV58oh3a8CMiUrGazsBZyfPY4ZUJZXFpQYtmAOdYsTQKRsTVb2sdjHeGBz7nFe8txEWsp00cTrsXdB1"
       );
 
-      if (createdOrder?._id) {
-        navigate(`/order-success/${createdOrder._id}`);
-      }
+      const response = await axiosi.post(
+        "/checkout/create-checkout-session",
+        {
+          products: cartItems,
+          orderData, // Send order data, not an actual order
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      //creating order directly
-      // dispatch(createOrderAsync(order));
-    } else if (selectedPaymentMethod === "CARD") {
-      dispatch(createOrderAsync(order));
+      if (response.status === 200) {
+        const sessionId = response.data.id;
+        const { error } = await stripe.redirectToCheckout({ sessionId });
+        
+        if (error) {
+          console.error("Error redirecting to stripe checkout", error);
+          alert("Payment failed. Please try again later");
+        }
+      } else {
+        console.error("Error initiated payment", response.data);
+        alert("Payment initiation failed. Please try again later");
+      }
+    } catch (err) {
+      console.error("Error with the card payment", err);
+      alert("An error occurred. Please try again later");
     }
-  };
+  }
+};
+
 
   useEffect(() => {
     if (addresses.length > 0) {

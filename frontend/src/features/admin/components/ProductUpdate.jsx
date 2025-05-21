@@ -21,10 +21,15 @@ import {
   useMediaQuery,
   useTheme,
   CircularProgress,
+  Box,
+  IconButton,
+  Avatar,
+  Chip,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { selectCategories } from "../../categories/CategoriesSlice";
 import { toast } from "react-toastify";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export const ProductUpdate = () => {
   const {
@@ -33,9 +38,12 @@ export const ProductUpdate = () => {
     setValue,
     watch,
     reset,
+    control,
     formState: { errors },
   } = useForm();
-  const { id } = useParams();
+
+  const { id } = useParams(); // product id
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -47,13 +55,14 @@ export const ProductUpdate = () => {
   const categories = useSelector(selectCategories || []);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [subCategories, setSubCategories] = useState([]);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
-  const [uploadingImages, setUploadingImages] = useState({});
-  const [thumbnail, setThumbnail] = useState("");
-  const [isAnyImageUploading, setIsAnyImageUploading] = useState(false);
-
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState("");
+  const [subCategories, setSubCategories] = useState([]);
+  const [currentThumbnail, setCurrentThumbnail] = useState("");
+  const [currentImages, setCurrentImages] = useState([]);
+  const [newThumbnail, setNewThumbnail] = useState(null);
+  const [newImages, setNewImages] = useState([]);
+  const [removedImages, setRemovedImages] = useState([]);
+  
 
   useEffect(() => {
     if (id) {
@@ -63,17 +72,31 @@ export const ProductUpdate = () => {
 
   useEffect(() => {
     if (selectedProduct && categories.length > 0) {
-      reset(selectedProduct);
-      setSelectedCategoryId(selectedProduct.category?._id || "");
-      setSelectedSubcategoryId(
-       selectedProduct.subcategory?._id || ""
-      );
-      setThumbnail(selectedProduct.thumbnail || "");
-      setUploadedImageUrls(selectedProduct.images || []);
-      setSubCategories(
-        categories.find((cat) => cat._id === selectedProduct.category?._id)
-          ?.subCategory || []
-      );
+      // Find the actual category object
+      const categoryId = selectedProduct.category?._id || "";
+      const subcategoryId = selectedProduct.subcategory?._id || "";
+
+      // Set form values with complete product data
+      const formData = {
+        ...selectedProduct,
+        category: categoryId,
+        subcategory: subcategoryId,
+      };
+
+      reset(formData);
+
+      // Update state variables
+      setSelectedCategoryId(categoryId);
+      setCurrentThumbnail(selectedProduct.thumbnail || "");
+      setCurrentImages(selectedProduct.images || []);
+
+      // Update subcategories based on selected category
+      if (categoryId) {
+        const category = categories.find((cat) => cat._id === categoryId);
+        if (category) {
+          setSubCategories(category.subCategory || []);
+        }
+      }
     }
   }, [selectedProduct, categories, reset]);
 
@@ -96,72 +119,120 @@ export const ProductUpdate = () => {
   const handleCategoryChange = (e) => {
     const categoryId = e.target.value;
     setSelectedCategoryId(categoryId);
+    setValue("category", categoryId);
+
+    // Update subcategories list
     const category = categories.find((cat) => cat._id === categoryId);
-    setSubCategories(category?.subCategory || []);
+    if (category) {
+      setSubCategories(category.subCategory || []);
+    } else {
+      setSubCategories([]);
+    }
+
+    // Clear subcategory selection when category changes
     setValue("subCategory", "");
   };
 
-  const handleFileUpload = useCallback(
-    async (file, index, isThumbnail = false) => {
-      if (!file) return;
-      try {
-        setUploadingImages((prev) => ({ ...prev, [index]: true }));
-        setIsAnyImageUploading(true);
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "first_time_cloudinary");
-        formData.append("cloud_name", "dlgy2avhv");
-
-        const response = await fetch(
-          "https://api.cloudinary.com/v1_1/dlgy2avhv/image/upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        if (!response.ok) throw new Error("Image upload failed");
-        const result = await response.json();
-
-        if (isThumbnail) {
-          setThumbnail(result.url);
-        } else {
-          const newImages = [...uploadedImageUrls];
-          newImages[index] = result.url;
-          setUploadedImageUrls(newImages);
-        }
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        toast.error("Failed to upload image");
-      } finally {
-        setUploadingImages((prev) => ({ ...prev, [index]: false }));
-        setIsAnyImageUploading(
-          Object.values(uploadingImages).some((status) => status)
-        );
-      }
-    },
-    [uploadedImageUrls, uploadingImages]
-  );
-
-  const handleProductUpdate = (data) => {
-    if (isAnyImageUploading) {
-      toast.warning("Please wait for images to finish uploading.");
-      return;
-    }
-
-    const updatedProduct = {
-      ...data,
-      _id: selectedProduct._id,
-      thumbnail,
-      images: uploadedImageUrls,
-    };
-    dispatch(updateProductByIdAsync(updatedProduct));
+  const handleSubcategoryChange = (e) => {
+    const subcategoryId = e.target.value;
+    setValue("subcategory", subcategoryId);
   };
 
-  console.log(selectedProduct, "selectedProduct");
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewThumbnail(file);
+      // Preview the new thumbnail
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCurrentThumbnail(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+const handleImagesChange = (e) => {
+  const files = Array.from(e.target.files);
+  if (files.length > 0) {
+    setNewImages([...newImages, ...files]);
+  }
+};
+
+  const removeImage = (index) => {
+    // If it's an existing image (URL), add to removedImages
+    if (typeof currentImages[index] === 'string') {
+      setRemovedImages([...removedImages, currentImages[index]]);
+    }
+    
+    // Remove from current images display
+    const updatedImages = [...currentImages];
+    updatedImages.splice(index, 1);
+    setCurrentImages(updatedImages);
+    
+    // If it's a new image (File object), remove from newImages
+    if (currentImages[index] instanceof File) {
+      const updatedNewImages = newImages.filter((_, i) => 
+        i !== index - (currentImages.length - newImages.length)
+      );
+      setNewImages(updatedNewImages);
+    }
+  };
+
+  const removeExistingImage = (index) => {
+  // Add to removed images list
+  setRemovedImages([...removedImages, currentImages[index]]);
+  // Remove from current images display
+  setCurrentImages(currentImages.filter((_, i) => i !== index));
+};
+
+const removeNewImage = (index) => {
+  setNewImages(newImages.filter((_, i) => i !== index));
+};
   
 
+const handleProductUpdate = (data) => {
+  const formData = new FormData();
+
+  // Basic product data
+  formData.append("_id", selectedProduct._id);
+  formData.append("title", data.title);
+  formData.append("category", data.category);
+  formData.append("subcategory", data.subcategory);
+  formData.append("description", data.description);
+  formData.append("price", data.price);
+  formData.append("discountPercentage", data.discountPercentage);
+
+  // Stock quantity
+  Object.entries(data.stockQuantity || {}).forEach(([size, quantity]) => {
+    formData.append(`stockQuantity[${size}]`, quantity);
+  });
+
+  // Handle thumbnail
+  if (newThumbnail) {
+    formData.append("thumbnail", newThumbnail);
+  } else if (!currentThumbnail) {
+    // If thumbnail was removed
+    formData.append("thumbnail", "");
+  }
+
+   currentImages
+    .filter(img => !removedImages.includes(img))
+    .forEach(img => {
+      formData.append("existingImages", img);
+    });
+
+  // Handle images to remove
+  removedImages.forEach(img => {
+    formData.append("removedImages", img);
+  });
+
+  // Handle new images (only the files from newImages state)
+  newImages.forEach(image => {
+    formData.append("images", image);
+  });
+
+  dispatch(updateProductByIdAsync(formData));
+};
 
   return (
     <Stack p={2} justifyContent="center" alignItems="center">
@@ -180,50 +251,62 @@ export const ProductUpdate = () => {
             {...register("title", { required: "Title is required" })}
             error={!!errors.title}
             helperText={errors.title?.message}
-            disabled
           />
 
           <Stack direction={is480 ? "column" : "row"} spacing={2}>
             <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={selectedCategoryId}
-                onChange={(e) => {
-                  const categoryId = e.target.value;
-                  setSelectedCategoryId(categoryId);
-                  setValue("category", categoryId);
-                  const category = categories.find(
-                    (cat) => cat._id === categoryId
-                  );
-                  setSubCategories(category?.subCategory || []);
-                  setValue("subCategory", "");
-                }}
-                error={!!errors.category}
-                label="Category"
-              >
-                {categories.map((category) => (
-                  <MenuItem key={category._id} value={category._id}>
-                    {category.name}
-                  </MenuItem>
-                ))}
-              </Select>
+              <InputLabel id="category-label">Category</InputLabel>
+              <Controller
+                name="category"
+                control={control}
+                defaultValue={selectedCategoryId}
+                render={({ field }) => (
+                  <Select
+                    labelId="category-label"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleCategoryChange(e);
+                    }}
+                    error={!!errors.category}
+                    label="Category"
+                  >
+                    {categories.map((category) => (
+                      <MenuItem key={category._id} value={category._id}>
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
             </FormControl>
 
             <FormControl fullWidth>
-              <InputLabel>Sub Category</InputLabel>
-              <Select
-                value={watch("subCategory")}
-                onChange={(e) => setValue("subCategory", e.target.value)}
-                error={!!errors.subCategory}
-                disabled={!selectedCategoryId}
-                label="Sub Category"
-              >
-                {subCategories.map((subCat) => (
-                  <MenuItem key={subCat._id} value={subCat._id}>
-                    {subCat.name}
-                  </MenuItem>
-                ))}
-              </Select>
+              <InputLabel id="subcategory-label">Sub Category</InputLabel>
+              <Controller
+                name="subcategory"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <Select
+                    labelId="subcategory-label"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleSubcategoryChange(e);
+                    }}
+                    error={!!errors.subCategory}
+                    disabled={!selectedCategoryId || subCategories.length === 0}
+                    label="Sub Category"
+                  >
+                    {subCategories.map((subCat) => (
+                      <MenuItem key={subCat._id} value={subCat._id}>
+                        {subCat.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
             </FormControl>
           </Stack>
 
@@ -272,32 +355,89 @@ export const ProductUpdate = () => {
             />
           ))}
 
-          <Typography>Upload Thumbnail</Typography>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileUpload(e.target.files[0], 0, true)}
-          />
-          {uploadingImages[0] && <CircularProgress size={20} />}
+          <Box>
+            <Typography gutterBottom>Current Thumbnail</Typography>
+            {currentThumbnail && (
+              <Box sx={{ position: 'relative', width: 'fit-content' }}>
+                <Avatar
+                  src={currentThumbnail}
+                  alt="Thumbnail preview"
+                  sx={{ width: 100, height: 100 }}
+                  variant="rounded"
+                />
+                <IconButton
+                  size="small"
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 0, 
+                    right: 0,
+                    backgroundColor: 'rgba(255,255,255,0.7)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.9)',
+                    }
+                  }}
+                  onClick={() => {
+                    setCurrentThumbnail("");
+                    setNewThumbnail(null);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleThumbnailChange}
+              style={{ marginTop: '8px' }}
+            />
+          </Box>
 
-          <Typography>Upload Images</Typography>
-          {[1, 2, 3, 4].map((index) => (
-            <Stack key={index} direction="row" alignItems="center" spacing={2}>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e.target.files[0], index)}
-              />
-              {uploadingImages[index] && <CircularProgress size={20} />}
+          <Box>
+            <Typography gutterBottom>Product Images</Typography>
+            <Stack direction="row" flexWrap="wrap" gap={2}>
+             {currentImages.map((image, index) => (
+    !removedImages.includes(image) && (
+      <Box key={`existing-${index}`} sx={{ position: 'relative' }}>
+        <Avatar
+          src={image}
+          alt={`Product image ${index + 1}`}
+          sx={{ width: 100, height: 100 }}
+          variant="rounded"
+        />
+        <IconButton onClick={() => removeExistingImage(index)}>
+          <DeleteIcon />
+        </IconButton>
+      </Box>
+    )
+  ))}
+
+  {/* New images preview */}
+  {newImages.map((image, index) => (
+    <Box key={`new-${index}`} sx={{ position: 'relative' }}>
+      <Avatar
+        src={URL.createObjectURL(image)}
+        alt={`New image ${index + 1}`}
+        sx={{ width: 100, height: 100 }}
+        variant="rounded"
+      />
+      <IconButton onClick={() => removeNewImage(index)}>
+        <DeleteIcon />
+      </IconButton>
+    </Box>
+  ))}
             </Stack>
-          ))}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImagesChange}
+              style={{ marginTop: '16px' }}
+            />
+          </Box>
 
           <Stack direction="row" justifyContent="flex-end" spacing={2}>
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={isAnyImageUploading}
-            >
+            <Button variant="contained" type="submit">
               Update Product
             </Button>
             <Button

@@ -63,6 +63,7 @@ export const Navbar = () => {
   };
 
   const handleLogout = () => {
+    navigate("/");
     dispatch(logoutAsync())
       .unwrap()
       .then(() => {
@@ -125,7 +126,7 @@ export const Navbar = () => {
                     </svg>
                   </button>
                   {shopDropdown && (
-                    <div className="absolute left-0 bg-white shadow-lg z-10 w-[96vw] mt-4 flex flex-wrap justify-between py-8 px-8 overflow-y-auto max-h-[80vh]">
+                    <div className="fixed left-0 right-0 mx-auto bg-white shadow-lg z-10 container mt-4 flex flex-wrap justify-between py-8 px-8 overflow-y-auto max-h-[80vh]">
                       {categories.map((category) => (
                         <div
                           key={category._id}
@@ -204,7 +205,7 @@ export const Navbar = () => {
           
           {/* Center Column - Logo */}
           <div className={`flex items-center justify-center transition-all duration-300 ${searchExpanded ? 'transform -translate-x-10' : ''}`}>
-            <Link to="/">
+            <Link to={loggedInUser?.isAdmin ? "/admin/dashboard" : "/"}>
               <h2 className="text-2xl font-bold text-black">
                 {loggedInUser?.isAdmin ? "Admin" : "BAROSA"}
               </h2>
@@ -216,12 +217,18 @@ export const Navbar = () => {
             {/* Expandable Search Bar */}
             <div className="relative search-container hidden sm:block">
               {searchExpanded ? (
-                <div className={`absolute right-0 w-64 md:w-80 transition-all duration-300 z-10 -top-3`}>
+                <div className={`absolute right-0 w-64 md:w-80 transition-all duration-300 z-10 -top-5`}>
+                   
+
                   <SearchBar className="w-full" />
+                  
                   <button 
                     type="button" 
-                    className="absolute right-12 top-1 text-gray-500"
-                    onClick={() => setSearchExpanded(false)}
+                    className="absolute right-12 top-1/4 mx-5 text-gray-500"
+                    onClick={() => { setSearchExpanded(false);
+                      
+                     navigate('/admin/dashboard') 
+                    }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -275,7 +282,9 @@ export const Navbar = () => {
                 <Profile
                   onClick={() => navigate("/login")}
                   className="w-5 h-5 cursor-pointer hover:text-gray-600"
-                />
+                />{loggedInUser && (
+                  
+               <>
                 <Love
                   onClick={() => navigate("/login")}
                   className="w-6 h-6 cursor-pointer hover:text-gray-600"
@@ -283,7 +292,8 @@ export const Navbar = () => {
                 <Cart
                   onClick={() => navigate("/login")}
                   className="w-6 h-6 cursor-pointer hover:text-gray-600"
-                />
+                /> 
+                </>)}
               </>
             )}
           </div>
@@ -295,7 +305,10 @@ export const Navbar = () => {
             <div className="py-4 px-6">
               {/* Search Bar in Mobile Menu */}
               <div className="mb-4">
+               
+                  
                 <SearchBar className="w-full" />
+              
               </div>
             
               {loggedInUser && (

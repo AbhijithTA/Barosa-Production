@@ -16,6 +16,7 @@ export const login=async(cred)=>{
         throw error.response.data
     }
 }
+
 export const verifyOtp=async(cred)=>{
     try {
         const res=await axiosi.post("auth/verify-otp",cred)
@@ -24,6 +25,8 @@ export const verifyOtp=async(cred)=>{
         throw error.response.data
     }
 }
+
+
 export const resendOtp=async(cred)=>{
     try {
         const res=await axiosi.post("auth/resend-otp",cred)

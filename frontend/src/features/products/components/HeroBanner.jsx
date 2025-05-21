@@ -10,6 +10,9 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Box,
+  Container,
+  Button,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,12 +70,15 @@ export const HeroBanner = () => {
   const [sort, setSort] = useState(null);
   const theme = useTheme();
 
+  // Enhanced breakpoints for better mobile responsiveness
   const is1200 = useMediaQuery(theme.breakpoints.down(1200));
   const is800 = useMediaQuery(theme.breakpoints.down(800));
   const is700 = useMediaQuery(theme.breakpoints.down(700));
   const is600 = useMediaQuery(theme.breakpoints.down(600));
   const is500 = useMediaQuery(theme.breakpoints.down(500));
-  const is488 = useMediaQuery(theme.breakpoints.down(488));
+  const is480 = useMediaQuery(theme.breakpoints.down(480));
+  const is400 = useMediaQuery(theme.breakpoints.down(400));
+  const is350 = useMediaQuery(theme.breakpoints.down(350));
 
   const products = useSelector(selectProducts);
   const [latestProducts, setLatestProducts] = useState([]);
@@ -88,35 +94,12 @@ export const HeroBanner = () => {
 
   const cartItemAddStatus = useSelector(selectCartItemAddStatus);
 
-  const isProductFilterOpen = useSelector(selectProductIsFilterOpen);
 
   const dispatch = useDispatch();
 
-  const handleBrandFilters = (e) => {
-    const filterSet = new Set(filters.brand);
 
-    if (e.target.checked) {
-      filterSet.add(e.target.value);
-    } else {
-      filterSet.delete(e.target.value);
-    }
 
-    const filterArray = Array.from(filterSet);
-    setFilters({ ...filters, brand: filterArray });
-  };
-
-  const handleCategoryFilters = (e) => {
-    const filterSet = new Set(filters.category);
-
-    if (e.target.checked) {
-      filterSet.add(e.target.value);
-    } else {
-      filterSet.delete(e.target.value);
-    }
-
-    const filterArray = Array.from(filterSet);
-    setFilters({ ...filters, category: filterArray });
-  };
+ 
 
   useEffect(() => {
     window.scrollTo({
@@ -199,7 +182,6 @@ export const HeroBanner = () => {
     dispatch(toggleFilters());
   };
 
-
   useEffect(() => {
     if (products.length > 0) {
       const sortedProducts = [...products]
@@ -210,11 +192,34 @@ export const HeroBanner = () => {
     }
   }, [products]);
 
+  // Calculate dynamic banner height based on screen size - 70% of viewport height for mobile
+  const getBannerHeight = () => {
+    if (is600) return "70vh"; // Using viewport height for mobile devices
+    if (is800) return "65vh";
+    if (is1200) return "60vh";
+    return "700px"; // Desktop size
+  };
+
+  // Calculate loader size based on screen width
+  const getLoaderWidth = () => {
+    if (is350) return "90%";
+    if (is400) return "95%";
+    if (is500) return "35vh";
+    return "25rem";
+  };
+
   return (
-    <>
+    <Container 
+      maxWidth={false} 
+      disableGutters={is480} 
+      sx={{ 
+        px: is480 ? 1 : is600 ? 2 : 3,
+        overflow: "hidden"
+      }}
+    >
       {productFetchStatus === "pending" ? (
         <Stack
-          width={is500 ? "35vh" : "25rem"}
+          width={getLoaderWidth()}
           height={"calc(100vh - 4rem)"}
           justifyContent={"center"}
           marginRight={"auto"}
@@ -223,22 +228,48 @@ export const HeroBanner = () => {
           <Lottie animationData={loadingAnimation} />
         </Stack>
       ) : (
-        <>
-          <Stack mb={"3rem"}>
-            {/* banners section */}
-            {!is600 && (
-              <Stack
-                sx={{
-                  width: "100%",
-                  height: is800 ? "300px" : is1200 ? "400px" : "700px",
-                }}
-              >
-                <ProductBanner images={bannerImages} />
-              </Stack>
-            )}
+        <Box 
+          component="section" 
+          sx={{ 
+            width: "100%",
+            // Set a height constraint for mobile view to ensure banner takes proper space
+            ...(is600 && {
+              height: "100vh",
+              display: "flex",
+              flexDirection: "column"
+            })
+          }}
+        >
+          <Stack 
+            spacing={is480 ? 2 : 3} 
+            mb={is480 ? "1.5rem" : "3rem"}
+            sx={{
+              ...(is600 && {
+                flex: 1
+              })
+            }}
+          >
+            {/* Banner section - now visible on all screen sizes with adaptive height */}
+            <Box
+              sx={{
+                width: "100%",
+                height: getBannerHeight(),
+                overflow: "hidden",
+                borderRadius: is350 ? "8px" : "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                position: "relative",
+              }}
+            >
+              <ProductBanner images={bannerImages} />
+              
+              {/* Overlay text for banner - responsive font sizes */}
+             
+            </Box>
+            
+           
           </Stack>
-        </>
+        </Box>
       )}
-    </>
+    </Container>
   );
 };

@@ -16,6 +16,13 @@ import {
   Stack,
   Typography,
   useMediaQuery,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
 } from "@mui/material";
 import {
   addToCartAsync,
@@ -37,6 +44,7 @@ import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import Favorite from "@mui/icons-material/Favorite";
+import InventoryIcon from "@mui/icons-material/Inventory";
 import {
   createWishlistItemAsync,
   deleteWishlistItemByIdAsync,
@@ -54,7 +62,6 @@ import ImageSlider from "../../../components/ImageSlider";
 
 const SIZES = ["XS", "S", "M", "L", "XL"];
 const COLORS = ["#020202", "#F6F6F6", "#B82222", "#BEA9A9", "#E2BB8D"];
-// const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
 export const ProductDetails = () => {
   const navigate = useNavigate();
@@ -231,23 +238,6 @@ export const ProductDetails = () => {
       dispatch(deleteWishlistItemByIdAsync(wishlistItems[index]._id));
     }
   };
-
-  // const [activeStep, setActiveStep] = React.useState(0);
-  // const maxSteps = product?.images.length;
-
-  // const handleNext = () => {
-  //   setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  // };
-
-  // const handleBack = () => {
-  //   setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  // };
-
-  // const handleStepChange = (step) => {
-  //   setActiveStep(step);
-  // };
-
-  console.log("product", product);
 
   return (
     <>
@@ -598,52 +588,116 @@ export const ProductDetails = () => {
                     </Stack>
                   )}
 
-                  {/* product perks */}
-                  <Stack
-                    mt={3}
-                    sx={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      border: "1px grayText solid",
-                      borderRadius: "7px",
-                    }}
-                  >
+                  {/* Product perks for customers / Stock per variant for admin */}
+                  {loggedInUser?.isAdmin ? (
+                    // Admin view - Stock per variant table
                     <Stack
-                      p={2}
-                      flexDirection={"row"}
-                      alignItems={"center"}
-                      columnGap={"1rem"}
-                      width={"100%"}
-                      justifyContent={"flex-sart"}
+                      mt={3}
+                      sx={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        border: "1px grayText solid",
+                        borderRadius: "7px",
+                      }}
                     >
-                      <Box>
-                        <LocalShippingOutlinedIcon />
-                      </Box>
-                      <Stack>
-                        <Typography>Free Delivery</Typography>
-                        <Typography>
-                          Enter your postal for delivery availabity
+                      <Stack
+                        p={2}
+                        width={"100%"}
+                        justifyContent={"flex-start"}
+                      >
+                        <Typography variant="h6" sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                          <InventoryIcon sx={{ mr: 1 }} /> Stock Per Variant
                         </Typography>
+                        
+                        <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+                          <Table size="small" aria-label="stock table">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Size</TableCell>
+                                <TableCell align="right">Available Stock</TableCell>
+                                <TableCell align="right">Status</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {SIZES.map((size) => (
+                                <TableRow key={size}>
+                                  <TableCell component="th" scope="row">
+                                    {size}
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    {product?.stockQuantity[size] || 0}
+                                  </TableCell>
+                                  <TableCell 
+                                    align="right"
+                                    sx={{ 
+                                      color: (product?.stockQuantity[size] || 0) <= 0 
+                                        ? "error.main" 
+                                        : (product?.stockQuantity[size] || 0) <= 5 
+                                          ? "warning.main" 
+                                          : "success.main"
+                                    }}
+                                  >
+                                    {(product?.stockQuantity[size] || 0) <= 0
+                                      ? "Out of Stock"
+                                      : (product?.stockQuantity[size] || 0) <= 5
+                                        ? "Low Stock"
+                                        : "In Stock"}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
                       </Stack>
                     </Stack>
-                    <hr style={{ width: "100%" }} />
+                  ) : (
+                    // Customer view - Product perks
                     <Stack
-                      p={2}
-                      flexDirection={"row"}
-                      alignItems={"center"}
-                      width={"100%"}
-                      columnGap={"1rem"}
-                      justifyContent={"flex-start"}
+                      mt={3}
+                      sx={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        border: "1px grayText solid",
+                        borderRadius: "7px",
+                      }}
                     >
-                      <Box>
-                        <CachedOutlinedIcon />
-                      </Box>
-                      <Stack>
-                        <Typography>Return Delivery</Typography>
-                        <Typography>Free 30 Days Delivery Returns</Typography>
+                      <Stack
+                        p={2}
+                        flexDirection={"row"}
+                        alignItems={"center"}
+                        columnGap={"1rem"}
+                        width={"100%"}
+                        justifyContent={"flex-sart"}
+                      >
+                        <Box>
+                          <LocalShippingOutlinedIcon />
+                        </Box>
+                        <Stack>
+                          <Typography>Free Delivery</Typography>
+                          <Typography>
+                            Enter your postal for delivery availabity
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                      <hr style={{ width: "100%" }} />
+                      <Stack
+                        p={2}
+                        flexDirection={"row"}
+                        alignItems={"center"}
+                        width={"100%"}
+                        columnGap={"1rem"}
+                        justifyContent={"flex-start"}
+                      >
+                        <Box>
+                          <CachedOutlinedIcon />
+                        </Box>
+                        <Stack>
+                          <Typography>Return Delivery</Typography>
+                          <Typography>Free 30 Days Delivery Returns</Typography>
+                        </Stack>
                       </Stack>
                     </Stack>
-                  </Stack>
+                  )}
                 </Stack>
               </Stack>
 
@@ -653,8 +707,8 @@ export const ProductDetails = () => {
               </Stack>
             </Stack>
           )}
-        </Stack>
-      )}
+        </Stack> 
+      )} 
     </>
   );
 };

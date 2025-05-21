@@ -2,6 +2,7 @@ const Cart = require("../models/Cart");
 const Counter = require("../models/Counter");
 const Order = require("../models/Order");
 const { sendMail } = require("../utils/Emails");
+const Product = require("../models/Product");
 
 exports.create = async (req, res) => {
   try {
@@ -11,6 +12,8 @@ exports.create = async (req, res) => {
     if (!user || !items || !address || !paymentMode || !total) {
       return res.status(400).json({ message: "Invalid request body" });
     }
+
+    console.log("Items received:", items);
 
     //find and increment the counter in one atomic operation
     const counter = await Counter.findOneAndUpdate(
@@ -33,6 +36,32 @@ exports.create = async (req, res) => {
       status: "Pending",
     });
 
+    for (const item of items) {
+  const { product, size, quantity } = item;
+
+  if (!product || !size || quantity == null) {
+    return res.status(400).json({ message: "Missing product, size, or quantity in one of the items" });
+  }
+
+  const productDoc = await Product.findById(product);
+  if (!productDoc) {
+    return res.status(404).json({ message: `Product not found: ${product}` });
+  }
+
+  const currentStock = productDoc.stockQuantity.get(size);
+  if (currentStock === undefined) {
+    return res.status(400).json({ message: `Variant/size '${size}' not found for product '${productDoc.title}'` });
+  }
+
+  if (currentStock < quantity) {
+    return res.status(400).json({ message: `Insufficient stock for '${productDoc.title}' size '${size}'` });
+  }
+
+  productDoc.stockQuantity.set(size, currentStock - quantity);
+  await productDoc.save();
+}
+
+
     // save the order to the database
     await created.save();
 
@@ -43,13 +72,13 @@ exports.create = async (req, res) => {
     const ownerEmail = process.env.OWNER_EMAIL;
     const subject = "New Order Received - Barosa Shopping";
 
-    const emailBody = `
-    <h2>New Order Received</h2>
+    const emailBody = 
+    `<h2>New Order Received</h2>
     <p>A new order has been placed. Please check the system for details.</p>
     <p><strong>Order Total:</strong> AED${total}</p>
     <p><strong>Payment Mode:</strong> ${paymentMode}</p>
-    <p>Kindly process the order as soon as possible.</p>
-`;
+    <p>Kindly process the order as soon as possible.</p>`
+;
 
     await sendMail(ownerEmail, subject, emailBody);
 

@@ -49,7 +49,7 @@ exports.createCategory = async (req, res) => {
       category: savedCategory,
     });
   } catch (error) {
-    console, log("Error creating category:", error);
+    console.log("Error creating category:", error);
     return res.status(500).json({ message: "Error creating category" });
   }
 };

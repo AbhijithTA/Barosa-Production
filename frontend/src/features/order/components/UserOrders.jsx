@@ -236,6 +236,8 @@ export const UserOrders = () => {
                             </Button>
                             {cartItems.some(
                               (cartItem) =>
+                                cartItem?.product &&
+                                product?.product &&
                                 cartItem.product._id === product.product._id
                             ) && (
                               <Button
@@ -246,7 +248,6 @@ export const UserOrders = () => {
                               >
                                 Already in Cart
                               </Button>
-                           
                             )}
                           </Stack>
                         </Stack>

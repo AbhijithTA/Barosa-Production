@@ -32,7 +32,7 @@ const productSchema = new Schema(
     },
     stockQuantity: {
       type: Map,
-      of: String,
+      of: Number,
       required: true,
     },
     thumbnail: {

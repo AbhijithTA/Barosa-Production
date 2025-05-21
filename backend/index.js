@@ -15,6 +15,8 @@ const reviewRoutes = require("./routes/Review");
 const wishlistRoutes = require("./routes/Wishlist");
 const checkoutRoutes = require("./routes/Checkout");
 const { connectToDB } = require("./database/db");
+const bodyParser = require('body-parser');
+const { handleStripeWebhook } = require("./controllers/Checkout");
 
 // server init
 const server = express();
@@ -37,6 +39,8 @@ server.use(cors({
     exposedHeaders: ['X-Total-Count'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE']
 }));
+
+server.post("/webhook", bodyParser.raw({ type: 'application/json' }), handleStripeWebhook);
 
 // middlewares
 server.use(express.json());

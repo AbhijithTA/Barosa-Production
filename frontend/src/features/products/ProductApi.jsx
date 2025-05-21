@@ -9,6 +9,8 @@ export const addProduct = async (data) => {
     throw error.response.data;
   }
 };
+
+
 export const fetchProducts = async (filters) => {
   let queryString = "";
 
@@ -17,11 +19,17 @@ export const fetchProducts = async (filters) => {
   }
 
   if (filters.category) {
-    filters.category.map((category) => {
-      queryString += `category=${category}&`;
+    filters.category.forEach((cat) => {
+      queryString += `category=${cat}&`;
     });
   }
 
+  //newly added: lunu
+  if (filters.subcategory) {
+    filters.subcategory.forEach((subcat) => {
+      queryString += `subCategory=${subcat}&`;
+    });
+  }
   if (filters.pagination) {
     queryString += `page=${filters.pagination.page}&limit=${filters.pagination.limit}&`;
   }
@@ -36,7 +44,8 @@ export const fetchProducts = async (filters) => {
 
   try {
     const res = await axiosi.get(`/products?${queryString}`);
-    const totalResults = await res.headers.get("X-Total-Count");
+    // const totalResults = await res.headers.get("X-Total-Count");
+    const totalResults = res.headers["x-total-count"];
     return { data: res.data, totalResults: totalResults };
   } catch (error) {
     throw error.response.data;
@@ -51,17 +60,28 @@ export const fetchProductById = async (id) => {
     throw error.response.data;
   }
 };
+
 export const updateProductById = async (update) => {
   try {
-    const res = await axiosi.patch(`/products/${update._id}`, update);
+    const res = await axiosi.patch(`/products/${update.get("_id")}`, update);
     return res.data;
   } catch (error) {
     throw error.response.data;
   }
 };
+// Soft delete (hide)
+export const softDeleteProductById = async (id) => {
+  try {
+    const res = await axiosi.patch(`/products/hide/${id}`);
+    return res.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
 export const undeleteProductById = async (id) => {
   try {
-    const res = await axiosi.patch(`/products/undelete/${id}`);
+    const res = await axiosi.patch(`/products/unhide/${id}`);
     return res.data;
   } catch (error) {
     throw error.response.data;
@@ -102,4 +122,3 @@ export const fetchSearchResults = async (query) => {
     throw error.response?.data || error.message;
   }
 };
-

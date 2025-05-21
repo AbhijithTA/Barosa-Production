@@ -7,6 +7,7 @@ import {
   toggleProductFeatured,
   undeleteProductById,
   updateProductById,
+  softDeleteProductById,
 } from "./ProductApi";
 
 const initialState = {
@@ -30,6 +31,8 @@ export const addProductAsync = createAsyncThunk(
     return addedProduct;
   }
 );
+
+
 export const fetchProductsAsync = createAsyncThunk(
   "products/fetchProductsAsync",
   async (filters) => {
@@ -37,6 +40,8 @@ export const fetchProductsAsync = createAsyncThunk(
     return products;
   }
 );
+
+
 export const fetchProductByIdAsync = createAsyncThunk(
   "products/fetchProductByIdAsync",
   async (id) => {
@@ -44,11 +49,22 @@ export const fetchProductByIdAsync = createAsyncThunk(
     return selectedProduct;
   }
 );
+
+
+
 export const updateProductByIdAsync = createAsyncThunk(
   "products/updateProductByIdAsync",
   async (update) => {
     const updatedProduct = await updateProductById(update);
     return updatedProduct;
+  }
+);
+// soft delete call
+export const softDeleteProductByIdAsync = createAsyncThunk(
+  "products/softDeleteProductByIdAsync",
+  async (id) => {
+    const deletedProduct = await softDeleteProductById(id);
+    return deletedProduct;
   }
 );
 export const undeleteProductByIdAsync = createAsyncThunk(
@@ -186,7 +202,23 @@ const productSlice = createSlice({
         state.productUpdateStatus = "rejected";
         state.errors = action.error;
       })
-
+      // soft delete
+      .addCase(softDeleteProductByIdAsync.pending, (state) => {
+      state.status = "pending";
+      })
+      .addCase(softDeleteProductByIdAsync.fulfilled, (state, action) => {
+        state.status = "fulfilled";
+        const index = state.products.findIndex(
+          (product) => product._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.products[index] = action.payload;
+        }
+      })
+      .addCase(softDeleteProductByIdAsync.rejected, (state, action) => {
+        state.status = "rejected";
+        state.errors = action.error;
+      })
       .addCase(undeleteProductByIdAsync.pending, (state) => {
         state.status = "pending";
       })
@@ -248,14 +280,22 @@ const productSlice = createSlice({
 
 // exporting selectors
 export const selectProductStatus = (state) => state.ProductSlice.status;
+
 export const selectProducts = (state) => state.ProductSlice.products;
+
 export const selectProductTotalResults = (state) =>
   state.ProductSlice.totalResults;
+
+
 export const selectSelectedProduct = (state) =>
   state.ProductSlice.selectedProduct;
+
+
 export const selectProductErrors = (state) => state.ProductSlice.errors;
+
 export const selectProductSuccessMessage = (state) =>
   state.ProductSlice.successMessage;
+
 export const selectProductUpdateStatus = (state) =>
   state.ProductSlice.productUpdateStatus;
 export const selectProductAddStatus = (state) =>

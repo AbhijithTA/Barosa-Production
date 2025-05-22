@@ -67,5 +67,5 @@ server.get("/", (req, res) => {
 
 // Start the server
 server.listen(8000, () => {
-    console.log('server [STARTED] ~ http://localhost:8000');
+    console.log('server [STARTED] ~ http://localhost:8001');
 });

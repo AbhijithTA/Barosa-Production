@@ -69,6 +69,6 @@ console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY);
 
 
 // Start the server
-server.listen(8001, () => {
-    console.log('server [STARTED] ~ http://localhost:8001');
+server.listen(8000, () => {
+    console.log('server [STARTED] ~ http://localhost:8000');
 });
